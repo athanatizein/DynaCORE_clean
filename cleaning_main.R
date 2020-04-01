@@ -4,8 +4,23 @@
 # Kenneth Yuen ()
 # Lara Puhlmann (puhlmann@cbs.mpg.de)
 
-# some steps:
-# load data
+rm(list = ls())
+require(foreign)
+require(dplyr)
+#require(plyr)
+# source
+
+# load data and add column indicating the origin of the data
+data_ger = read.csv(".csv", sep = ",", stringsAsFactors = FALSE)
+data_ger$survey = as.factor("ger")
+
+data_xx = read.csv(".csv", sep = ",", stringsAsFactors = FALSE)
+data_xx$survey = as.factor("xx")
+
+data_xy = read.csv(".csv", sep = ",", stringsAsFactors = FALSE)
+data_xy$survey = as.factor("xy")
+
+data_all = merge(data_ger, data_xx, data_xy)
 
 # combine files from multiple languages - this is for later
 
