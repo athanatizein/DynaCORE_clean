@@ -217,13 +217,7 @@ for(i in 1:length(df$Respondent.ID)){
   df$cohabitants.underage = as.numeric(df$cohabitants.underage)
 >>>>>>> 737190eb3392c0da8c8a0095929622a2186d84c3
     ### RANK df$illness.prone
- 
-
   
-  
-  
-  
-  
-  out = df
+  return(df)
 }
   
