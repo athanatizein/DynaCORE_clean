@@ -140,10 +140,12 @@ rename <- function(df){
   
 # While it is possible to use grepl to match the strings in multiple choice questions, I was not sure if the text will be different depending on the language of the survey. So I tried a workaround based on position in the survey only - LP
   
-#x <- vector(mode = "list", length = 0)
-  for(i in 1:length(df$Respondent.ID)){
-    #x <- vector(mode = "any", length = 0)
+  
+for(i in 1:length(df$Respondent.ID)){
     x <- vector()
+    if(nchar(df$X[i]) > 0){
+      x[length(x)+1] = 1
+    }
     if(nchar(df$X.1[i]) > 0){
       x[length(x)+1] = 1
     } 
@@ -189,12 +191,9 @@ rename <- function(df){
     if(nchar(df$X.15[i]) > 0){
       x[length(x)+1] = df$X.15[i]
     }
-    df$occupation[i] = list(x)
-  }
- 
+  df$occupation[i] = list(x)
+}
 
-#  l <- sapply(colnames(df$X.1), function(x) grep("Arts", df$X.1[,x]))
-  
   df$language = as.factor(df$language)
   df$Respondent.ID = as.factor(df$Respondent.ID )
   df$Collector.ID = as.factor(df$Collector.ID)
