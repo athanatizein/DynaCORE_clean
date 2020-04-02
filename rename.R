@@ -140,12 +140,8 @@ rename <- function(df){
   
 
 }
- 
 
-#  l <- sapply(colnames(df$X.1), function(x) grep("Arts", df$X.1[,x]))
-  
 
-    ### RANK df$illness.prone
  
 
   
