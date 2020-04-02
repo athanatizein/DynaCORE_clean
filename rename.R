@@ -138,13 +138,84 @@ rename <- function(df){
   
   
   
+<<<<<<< HEAD
 
+=======
+# While it is possible to use grepl to match the strings in multiple choice questions, I was not sure if the text will be different depending on the language of the survey. So I tried a workaround based on position in the survey only - LP
+  
+  
+for(i in 1:length(df$Respondent.ID)){
+    x <- vector()
+    if(nchar(df$X[i]) > 0){
+      x[length(x)+1] = 1
+    }
+    if(nchar(df$X.1[i]) > 0){
+      x[length(x)+1] = 1
+    } 
+    if(nchar(df$X.2[i]) > 0){
+      x[length(x)+1] = 2
+    } 
+    if(nchar(df$X.3[i]) > 0){
+      x[length(x)+1] = 3
+    } 
+    if(nchar(df$X.4[i]) > 0){
+      x[length(x)+1] = 4
+    } 
+    if(nchar(df$X.5[i]) > 0){
+      x[length(x)+1] = 5
+    } 
+    if(nchar(df$X.6[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.7[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.8[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.9[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.10[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.11[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.12[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.13[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.14[i]) > 0){
+      x[length(x)+1] = 6
+    }
+    if(nchar(df$X.15[i]) > 0){
+      x[length(x)+1] = df$X.15[i]
+    }
+  df$occupation[i] = list(x)
+>>>>>>> 737190eb3392c0da8c8a0095929622a2186d84c3
 }
- 
 
+<<<<<<< HEAD
 #  l <- sapply(colnames(df$X.1), function(x) grep("Arts", df$X.1[,x]))
   
 
+=======
+  df$language = as.factor(df$language)
+  df$Respondent.ID = as.factor(df$Respondent.ID )
+  df$Collector.ID = as.factor(df$Collector.ID)
+  df$age = as.numeric(as.character(unlist(df$age)))
+  
+  df$older.or.18 = as.factor(df$older.or.18)
+  df$consent = as.factor(df$consent)
+  df$gender = as.factor(df$gender)
+  df$nationality = as.factor(df$nationality)
+  df$nationality = as.factor(df$nationality)
+  df$relationship.status = as.factor(df$relationship.status)
+  df$cohabitants.underage = as.numeric(df$cohabitants.underage)
+>>>>>>> 737190eb3392c0da8c8a0095929622a2186d84c3
     ### RANK df$illness.prone
  
 
