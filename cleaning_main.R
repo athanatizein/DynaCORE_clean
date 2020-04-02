@@ -14,17 +14,26 @@ require(dplyr)
 data_ger = read.csv("DynaCORE_test_data_ger.csv", sep = ",", stringsAsFactors = FALSE)
 data_ger$survey_country = as.factor("ger")
 
-data_xx = read.csv("DynaCORE_test_data_xx.csv", sep = ",", stringsAsFactors = FALSE)
-data_xx$survey_country = as.factor("xx")
+# combine files from multiple languages
 
-data_xy = read.csv(".csv", sep = ",", stringsAsFactors = FALSE)
-data_xy$survey_country = as.factor("xy")
+# data_xx = read.csv("DynaCORE_test_data_xx.csv", sep = ",", stringsAsFactors = FALSE)
+# data_xx$survey_country = as.factor("xx")
+# 
+# data_xy = read.csv("DynaCORE_test_data_xx.csv", sep = ",", stringsAsFactors = FALSE)
+# data_xy$survey_country = as.factor("xy")
+# data_all = rbind(data_ger, data_xx, data_xy)
 
-# combine files from multiple languages - this is for later
-data_all = merge(data_ger, data_xx, data_xy)
+# remove first row and columns that are only NA
+data_ger = data_ger[, colSums(is.na(data_ger)) != nrow(data_ger)]
+data_ger = data_ger[-1,]
+
+
+# rename question columns and restructure format
+data_ger
+
+
 xx = which(!is.na(data_ger$Respondent.ID))
 # identify NAs, subjects to be excluded entirely..
 
 # compile variables of interest
 
-# testing to see if this creates a new branch
