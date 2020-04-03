@@ -163,18 +163,24 @@ for(i in 1:length(data_en$Respondent.ID)){
 
 data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)
 
+#get rid of any cases with missings:
+
+data_en$missing <- rowSums(is.na(data_en[,c(68:154,156:167)]))
+data_en <- data_en[data_en$missing == 0,]
+
 #GHQ: 
 term <- "CM"
 GHQ <- grep(term, names(data_en))
 GHQrecode <- function(x){recode(x, '1'=0L, '2'=1L, '3'=2L, '4'=3L)}
 data_en[GHQ] <- lapply(data_en[GHQ], GHQrecode)
+GHQ <- GHQ[1:12]
 data_en$GHQsum <- rowSums(data_en[GHQ])
 
 #SOZU (percieved soc support):
 
 term <- "H2_"
 SOZU <- grep(term, names(data_en))
-SOZU <- variables[1:7]
+SOZU <- SOZU[1:7]
 data_en$SOZUSum <- rowSums(data_en[SOZU])
 
 #COVID-19 support:
@@ -224,9 +230,14 @@ term <- "CE_"
 CE <- grep(term, names(data_en))
 CE <- CE[1:30]
 data_en$CEcount <- rowSums(data_en[CE] >0) #stressor count
+data_en$CEweighted <- rowSums(data_en[CE])/5 #weighted
 
-# I will procede working here later/MZ
-
+#DHs:
+term <- "GE_"
+GE <- grep(term, names(data_en))
+GE <- GE[1:12]
+data_en$GEcount <- rowSums(data_en[GE] >0) #stressor count
+data_en$GEweighted <- rowSums(data_en[GE])/5 #weighted
 
 
 ##################### identify subjects to exclude ##############
