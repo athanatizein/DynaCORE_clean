@@ -239,6 +239,14 @@ GE <- GE[1:12]
 data_en$GEcount <- rowSums(data_en[GE] >0) #stressor count
 data_en$GEweighted <- rowSums(data_en[GE])/5 #weighted
 
+#####################SR Score###################
+
+#adapted from Haakon's script
+m1 <- summary(lm(scale(GHQsum)~scale(GEcount),data= data_en))
+data_en$SR_GEcount <-as.numeric(scale(resid(m1)))
+
+m2 <- summary(lm(scale(GHQsum)~scale(CEcount),data= data_en))
+data_en$SR_CEcount <-as.numeric(scale(resid(m2)))
 
 ##################### identify subjects to exclude ##############
 # exclude subjects under 18
