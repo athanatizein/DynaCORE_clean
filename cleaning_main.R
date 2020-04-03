@@ -52,6 +52,10 @@ data_en$nationality = as.factor(data_en$nationality)
 data_en$relationship.status = as.factor(data_en$relationship.status)
 data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 data_en$risk.group = as.factor(data_en$risk.group)
+data_en$country.residence = as.factor(data_en$country.residence)
+data_en$away.currently = as.factor(data_en$away.currently)
+data_en$country = as.factor(data_en$away.country)
+data_en$away.currently = as.factor(data_en$away.currently)
 
 ## date and completion time ##
 
@@ -107,13 +111,17 @@ numextract <- function(string){
 # data_en$education[2] = "22 years"
 # data_en$education[4] = "5 primary school 10 highschool"
 
+data_en$education.fulltext = data_en$education
 data_en$education = numextract(data_en$education)
 data_en$education = as.numeric(data_en$education)
 
 for(i in 1:length(data_en$Respondent.ID)){
-  if (!is.na(data_en$age[i])) {
-    if(data_en$age[i] < 18 || data_en$age[i] > 100) {
-      data_en$age[i] = NA
+  if (!is.na(data_en$education[i])) {
+    if(data_en$education[i] > data_en$age[i]-3){
+      data_en$education[i] = NA
+    }
+    if(!is.na(data_en$education[i]) && data_en$education[i] > 10){
+      data_en$education.fulltext[i] = NA
     }
   }
 }
@@ -145,3 +153,10 @@ data_en$SOZUSum <- rowSums(data_en[SOZU])
 #
 
 # identify NAs, subjects to be excluded entirely..
+
+
+
+##### quality control #####
+# "education.fulltext" includes the full answer for education for anyone with less than 10 years.
+# check these answers to make sure this was not due to typos or nor summing the total years of education
+
