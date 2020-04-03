@@ -116,30 +116,7 @@ formatting <- function(data){
   }
   
   
-  #   
-  # #GHQ-12: 
-  # GHQfactor <- function(x){factor(x, levels = c("Not at all", "No more than usual", "Rather more than usual", "Much more than usual"))}
-  # term <- "CM"
-  # variables <- grep(term, names(data_ger))
-  # data_ger[variables] <- lapply(data_ger[variables], GHQfactor)
-  # data_ger[variables] <- lapply(data_ger[variables], as.numeric)
-  # 
-  # #SOZU K-10:
-  # SOZUfactor <- function(x){factor(x, levels= c("Does not apply at all", "Hardly applies", "Somewhat applies", "Rather applies", "Completely applies" ))}
-  # term <- "H2_"
-  # variables <- grep(term, names(data_ger))
-  # variables <- variables[1:7]
-  # data_ger[variables] <- lapply(data_ger[variables], SOZUfactor)
-  # data_ger[variables] <- lapply(data_ger[variables], as.numeric)
-  # 
-  # '''
-  # (1) Does not apply at all
-  # (2) Hardly applies
-  # (3) Somewhat applies
-  # (4) Rather applies
-  # (5) Completely applies 
-  # '''
-  # 
+
   
   return(df)
   
