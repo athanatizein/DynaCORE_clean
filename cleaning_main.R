@@ -31,6 +31,8 @@ numextract <- function(string){
 
 # load data and add column indicating the origin of the data
 data_en = read.csv("DynaCORE_test_answer_number.csv", sep = ",", stringsAsFactors = FALSE)
+data_test = read.csv("DynaCORE_test_data_firstround.csv", sep = ",", stringsAsFactors = FALSE)
+
 data_en$survey_country = as.factor("en")
 
 data_en = rename(data_en)
@@ -86,8 +88,10 @@ data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
 xx = numextract(data_en$X.28)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
 
+# I think mental health is wrongly coded as 0 = yes, 1 = no, so recode ONCE ONLY:
+data_en$diagnosed.mental.health = revalue(data_en$diagnosed.mental.health, c("0"="1", "1"="0"))
 
-## date and completion time ##
+################# date and completion time ########
 
 #split weird month-day-year date + time col into two col, one with the weird date format, one with correct time
 for(i in 1:length(data_en$Respondent.ID)){
@@ -123,7 +127,18 @@ data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime)
 # #test
 # data_en$completionTime[3] #gives time difference in minutes
 
-#### age #####
+
+##### date of Corona test #####
+data_en$tested.pos.date = gsub(".", "/", data_en$tested.pos.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
+data_en$tested.pos.date[which(nchar(data_en$tested.pos.date)<5)]=NA # set all that are not a date to NA
+#convert month-day-year to year-month-day date
+data_en$tested.pos.date = as.Date(data_en$tested.pos.date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
+#date as POSIXlt
+data_en$tested.pos.date = as.POSIXlt(paste(data_en$tested.pos.date), tz = "Europe/Berlin", format="%Y-%m-%d")
+
+
+###### age #####
+
 # extract the numeric component of free form age response
 
 # # test
@@ -138,7 +153,7 @@ data_en$age = numextract(data_en$age)
 data_en$age = as.numeric(data_en$age)
 data_en$age[which(data_en$age > 100)] = NA
 
-#### eduation #####
+#### education #####
 
 # extract the numeric component of free form education response
 numextract <- function(string){ 
@@ -244,6 +259,7 @@ data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
 # exclude subjects with no response variance (check block wise)
 
 # calculate variance
+var(as.vector(as.matrix(data[1, 5:10]))) #calculates variance for row 1, column 5:10
 variance = lapply(data_en[GHQ],var())
 variance = lapply(data_en[SOZU],var())
 #ASKU
