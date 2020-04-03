@@ -8,13 +8,15 @@ rm(list = ls())
 require(foreign)
 require(dplyr)
 #require(plyr)
-# source
+# run the functions 'rename.R', 'formatting.R', ... or source:
+# source("/.../DynaCORE_clean/rename.R")
+# source("/.../DynaCORE_clean/formatting.R")
 
 # load data and add column indicating the origin of the data
 data_en = read.csv("DynaCORE_test_data_en.csv", sep = ",", stringsAsFactors = FALSE)
 data_en$survey_country = as.factor("en")
 
-x = rename(data_en)
+data_en = rename(data_en)
 
 # combine files from multiple languages
 
