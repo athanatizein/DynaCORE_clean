@@ -14,7 +14,7 @@ require(dplyr)
 data_en = read.csv("DynaCORE_test_data_en.csv", sep = ",", stringsAsFactors = FALSE)
 data_en$survey_country = as.factor("en")
 
-x = rename_test(data_en)
+x = rename(data_en)
 
 # combine files from multiple languages
 
