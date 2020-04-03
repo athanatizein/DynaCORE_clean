@@ -34,12 +34,17 @@ data_en = rename(data_en)
 data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
 data_en = data_en[-1,]
 xx = which(!is.na(data_en$Respondent.ID))
+
+# note that in the real data, the above step will also exclude the column IP address
+
+
 # identify NAs, subjects to be excluded entirely..
 
 #################### plausibility checks ########################
 
 #### age #####
 
+# extract the numeric component of free form age response
 numextract <- function(string){ 
   str_extract(string, "\\-*\\d+\\.*\\d*")
 } 
@@ -48,17 +53,19 @@ numextract <- function(string){
 data_en$age[2] = "22 years old"
 data_en$age[4] = "I am 711 years old"
 
-for(i in 1:length(df$Respondent.ID)){
+for(i in 1:length(data_en$Respondent.ID)){
   data_en$age[i] = numextract(data_en$age[i])
 }
 
 data_en$age = as.numeric(data_en$age)
 
-# for(i in 1:length(df$Respondent.ID)){
-#   if(data_en$age[i] < 18 | data_en$age[i] > 100) {
-#     data_en$age = NA
-#   }
-# }  
+for(i in 1:length(data_en$Respondent.ID)){
+  if (!is.na(data_en$age[i])) {
+    if(data_en$age[i] < 18 || data_en$age[i] > 100) {
+      data_en$age[i] = NA
+    }
+  }
+}
 
 ################### restructure variables ########################
 
