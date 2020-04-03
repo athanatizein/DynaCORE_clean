@@ -58,6 +58,10 @@ data_en = data_en[-xx,]
 #################### plausibility checks & basic formatting ########################
 data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)] <- lapply(data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)], as.factor)
 
+# set responses for place of location to NA if away currently was answered with 0
+data_en$away.country[which(data_en$away.currently==2)] <- NA
+data_en$away.city[which(data_en$away.currently==2)] <- NA
+
 data_en$income = factor(data_en$income, order = TRUE)
 data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
 data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
@@ -232,19 +236,28 @@ data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 # exclude subjects with very short completion time
 data_en$Respondent.ID[which(data_en$completionTime < 4)]<- NA
 
-# exclude subjects with no response variance (check block wise)
+##### exclude subjects not from Europe
 
-# calculate variance
-var(as.vector(as.matrix(data[1, 5:10]))) #calculates variance for row 1, column 5:10
-variance = lapply(data_en[GHQ],var())
 
-#------------------------------Suggestion: calculating variance per questionnaire--------------------------
+
+### exclude subjects with no response variance (check block-wise)
+var = matrix(NA, nrow = length(data_en$Respondent.ID), ncol = 8)
 for (i in 1:nrow(data_en)){ 
-  print(var(as.vector(as.matrix(data_en[i, 5:10])))) #5:10 reflects column 5 to 10, change accordingly per questionnaire 
+  var[i,1] = (var(as.vector(as.matrix(data_en[i, GHQ])))) 
+  var[i,2] = (var(as.vector(as.matrix(data_en[i, SOZU])))) 
+  var[i,3] = (var(as.vector(as.matrix(data_en[i, ASKU])))) 
+  var[i,4] = (var(as.vector(as.matrix(data_en[i, BRS])))) 
+  var[i,5] = (var(as.vector(as.matrix(data_en[i, COPE])))) 
+  var[i,6] = (var(as.vector(as.matrix(data_en[i, CERQ])))) 
+  var[i,7] = (var(as.vector(as.matrix(data_en[i, CE])))) 
 }
+
+data_en$response_variance = rowSums(var)
 #add variance as an additional column in the data frame
-data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[5:10]))) #change 5:10 
-                          
+#data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[5:10]))) #change 5:10 
+ 
+data_en$Respondent.ID[which(data_en$response_variance == 0)]<- NA
+
 ###Comment: if the columns are not neatly lined up (e.g. following the 5:10 example) you can also use a vector. In it, specify column names, example below
 # x = c("colname1", "colname2", "colname3", "colname4", "colname5", "colname6") #specify columns per questionnaire
 # for (i in 1:nrow(data_en)){ 
@@ -253,23 +266,12 @@ data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[5:10]))) 
 
 # #add variance as an additional column in the data frame
 # data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[x]))) 
-                    
-                          
-#------------------------------Suggestion end--------------------------
 
-variance = lapply(data_en[SOZU],var())
-#ASKU
-#BRS
-#BFI
-#..
-
-data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
+### exclude subjects based on completion time?
+#data_en$Respondent.ID[which(data_en$completionTime < 400)]<- NA
 
 xx = which(is.na(data_en$Respondent.ID))
 data_en = data_en[-xx,]
-
-#xx = which(!is.na(data_en$Respondent.ID))
-
 
 # remove unnecessary columns 
 xx = grep("X", colnames(data_en))
