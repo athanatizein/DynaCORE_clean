@@ -3,6 +3,7 @@
 # Matthias Zerban (matthias.zerban@unimedizin-mainz.de)
 # Kenneth Yuen ()
 # Lara Puhlmann (puhlmann@cbs.mpg.de)
+# Jeroen Weermeijer (jeroen.weermeijer@kuleuven.be)
 
 
 
@@ -87,7 +88,8 @@ for(i in 1:length(data_en$Respondent.ID)){
   data_en$End.Time[i] = paste(end[[1]][2], end[[1]][3])
 }
 
-data_en$Start.Date = gsub(".", "/", data_en$Start.Date, fixed=TRUE)
+#line of code that deals with different separators that occur in surveymonkey raw data for date outputs (e.g. mm/dd/yyyy vs. mm.dd.yyyy).
+data_en$Start.Date = gsub(".", "/", data_en$Start.Date, fixed=TRUE) #mm.dd.yyyy becomes mm/dd/yyyy
 
 #convert month-day-year to year-month-day date
 data_en$Start.Date = as.Date(data_en$Start.Date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
