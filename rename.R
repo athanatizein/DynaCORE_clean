@@ -1,4 +1,6 @@
-rename <- function(df){
+rename <- function(data){
+  
+  df = data
   
   names(df)[1] <- "Respondent.ID"
   names(df)[2] <- "Collector.ID"
@@ -135,13 +137,6 @@ rename <- function(df){
   names(df)[169] <- "O_01"
   names(df)[170] <- "O_02"
   names(df)[171] <- "O_03"
-  
-  
-  
-
-}
-
-
  
 
   

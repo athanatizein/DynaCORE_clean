@@ -1,6 +1,9 @@
 #function to adapt variable classes in DynaCORE-C
 
-formatting <- function(df){
+formatting <- function(data){
+  
+  df = data
+################### confounds ########################
   
   df$language = as.factor(df$language)
   df$Respondent.ID = as.factor(df$Respondent.ID )
@@ -17,57 +20,68 @@ formatting <- function(df){
   
   # While it is possible to use grepl to match the strings in multiple choice questions, I was not sure if the text will be different depending on the language of the survey. So I tried a workaround based on position in the survey only - LP
   
-  #x <- vector(mode = "list", length = 0)
+  # to do based on text, use:
+  #  l <- sapply(colnames(df$X.1), function(x) grep("Arts", df$X.1[,x]))
+  
+  
   for(i in 1:length(df$Respondent.ID)){
-    x <- vector(mode = "list", length = 0)
+    x <- vector()
+    if(nchar(df$X[i]) > 0){
+      x[length(x)+1] = 1
+    }
     if(nchar(df$X.1[i]) > 0){
-      x[[length(x)+1]] = 1
-    } 
+      x[length(x)+1] = 1
+    }
     if(nchar(df$X.2[i]) > 0){
-      x[[length(x)+1]] = 2
-    } 
+      x[length(x)+1] = 2
+    }
     if(nchar(df$X.3[i]) > 0){
-      x[[length(x)+1]] = 3
-    } 
+      x[length(x)+1] = 3
+    }
     if(nchar(df$X.4[i]) > 0){
-      x[[length(x)+1]] = 4
-    } 
+      x[length(x)+1] = 4
+    }
     if(nchar(df$X.5[i]) > 0){
-      x[[length(x)+1]] = 5
-    } 
+      x[length(x)+1] = 5
+    }
     if(nchar(df$X.6[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.7[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.8[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.9[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.10[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.11[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.12[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.13[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.14[i]) > 0){
-      x[[length(x)+1]] = 6
+      x[length(x)+1] = 6
     }
     if(nchar(df$X.15[i]) > 0){
-      x[[length(x)+1]] = df$X.15[i]
+      x[length(x)+1] = df$X.15[i]
     }
     df$occupation[i] = list(x)
-  
-  
+  }
+
+    # extract time from date variable
+    # as.Date(data_en$)
+    
+    # rank df$illness.prone
+    
   #GHQ-12: 
   GHQfactor <- function(x){factor(x, levels = c("Not at all", "No more than usual", "Rather more than usual", "Much more than usual"))}
   term <- "CM"
@@ -82,6 +96,8 @@ formatting <- function(df){
 (2) Rather more than usual  
 (3) Much more than usual 
 '''
+  
+  
   
   }
   
