@@ -138,8 +138,6 @@ rename <- function(data){
   names(df)[170] <- "O_02"
   names(df)[171] <- "O_03"
  
-
-  
   return(df)
 }
   
