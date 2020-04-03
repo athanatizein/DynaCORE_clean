@@ -51,6 +51,27 @@ data_en$nationality = as.factor(data_en$nationality)
 data_en$nationality = as.factor(data_en$nationality)
 data_en$relationship.status = as.factor(data_en$relationship.status)
 data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
+data_en$risk.group = as.factor(data_en$risk.group)
+
+## date and completion time ##
+
+for(i in 1:length(data_en$Respondent.ID)){
+  start = strsplit(data_en$Start.Date[i], " ")
+  data_en$Start.Date[i] = start[[1]][1]
+  data_en$Start.Time[i] = paste(start[[1]][2], start[[1]][3])
+  
+  end = strsplit(data_en$End.Date[i], " ")
+  data_en$End.Date[i] = end[[1]][1]
+  data_en$End.Time[i] = paste(end[[1]][2], end[[1]][3])
+}
+
+# put in proper date format - this is a bit tricky
+#as.POSIXlt(data_en$Start.Date)
+#as.numeric(now)
+#[1] 1.262e+09
+#R> now + 10  # adds 10 seconds
+#[1] "2009-12-25 18:39:21 CST"
+
 
 #### age #####
 
@@ -74,26 +95,28 @@ for(i in 1:length(data_en$Respondent.ID)){
   }
 }
 
-## date and completion time ##
+
+#### eduation #####
+
+# extract the numeric component of free form education response
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+# # test
+# data_en$education[2] = "22 years"
+# data_en$education[4] = "5 primary school 10 highschool"
+
+data_en$education = numextract(data_en$education)
+data_en$education = as.numeric(data_en$education)
 
 for(i in 1:length(data_en$Respondent.ID)){
-  start = strsplit(data_en$Start.Date[i], " ")
-  data_en$Start.Date[i] = start[[1]][1]
-  data_en$Start.Time[i] = paste(start[[1]][2], start[[1]][3])
-  
-  end = strsplit(data_en$End.Date[i], " ")
-  data_en$End.Date[i] = end[[1]][1]
-  data_en$End.Time[i] = paste(end[[1]][2], end[[1]][3])
+  if (!is.na(data_en$age[i])) {
+    if(data_en$age[i] < 18 || data_en$age[i] > 100) {
+      data_en$age[i] = NA
+    }
+  }
 }
-
-# put in proper date format - this is a bit tricky
-#as.POSIXlt(data_en$Start.Date)
-#as.numeric(now)
-#[1] 1.262e+09
-#R> now + 10  # adds 10 seconds
-#[1] "2009-12-25 18:39:21 CST"
-
-
 
 # remove unnecessary columns 
 xx = grep("X", colnames(data_en))
