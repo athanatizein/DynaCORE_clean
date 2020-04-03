@@ -63,6 +63,9 @@ for(i in 1:length(data_en$Respondent.ID)){
   }
 }
 
+## date and completion time ##
+as.Date(data_en$Start.Date)
+
 ################### restructure variables ########################
 
 
