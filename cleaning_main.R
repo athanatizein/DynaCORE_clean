@@ -4,10 +4,20 @@
 # Kenneth Yuen ()
 # Lara Puhlmann (puhlmann@cbs.mpg.de)
 
+
+
+
+#
+#WARNING: Only run once! 
+#
+
+
+
 rm(list = ls())
 require(foreign)
 require(dplyr)
 require(stringr)
+require(BBmisc)
 #require(plyr)
 # run the functions 'rename.R', 'formatting.R', ... or source:
 # source("/.../DynaCORE_clean/rename.R")
@@ -72,17 +82,64 @@ term <- "CM"
 GHQ <- grep(term, names(data_en))
 GHQrecode <- function(x){recode(x, '1'=0L, '2'=1L, '3'=2L, '4'=3L)}
 data_en[GHQ] <- lapply(data_en[GHQ], GHQrecode)
-
 data_en$GHQsum <- rowSums(data_en[GHQ])
 
-#SOZU:
+#SOZU (percieved soc support):
 
 term <- "H2_"
 SOZU <- grep(term, names(data_en))
 SOZU <- variables[1:7]
-
 data_en$SOZUSum <- rowSums(data_en[SOZU])
 
-#
+#COVID-19 support:
+#data_en$H2_08 <- as.numeric(data_en$H2_08)
+
+#Optimism:
+#data_en$H3_01 <- as.numeric(data_en$H3_01)
+
+#ASKU (self efficacy):
+term <-"H4_"
+ASKU <- grep(term, names(data_en))
+data_en$ASKUSum <- rowSums(data_en[ASKU])
+
+# self-percieved reslience (BRS):
+term <- "H5_"
+BRS <- grep(term, names(data_en))
+BRSrec <- c("H5_02", "H5_04", "H5_06")
+data_en[,BRSrec] <- 6 - data_en[,BRSrec]
+data_en$BRSMean <- rowMeans(data_en[BRS])
+
+#BFI Neuroticism:
+data_en$H6_01 <- 6 - data_en$H6_01
+term <- "H6_"
+BFI <- grep(term, names(data_en))
+BFIrecode <- function(x){recode(x, '1'=-2L, '2'=-1L, '3'=0L, '4'=1L,'5'=2L)}
+data_en[BFI] <- lapply(data_en[BFI], BFIrecode)
+data_en$BFIsum <- rowSums(data_en[BFI])
+
+#COPE
+term <- "COPE"
+COPE <- grep(term, names(data_en))
+data_en$COPESum <- rowSums(data_en[COPE])
+
+#CERQ
+term <- "CERQ"
+CERQ <- grep(term, names(data_en))
+data_en$CERQSum <- rowSums(data_en[CERQ])
+
+#Positive Appraisal Style:
+
+PAS <- data_en[,c(CERQ, 106, 110 )]
+PAS[,c("H1_COPE_18","H1_COPE_28")] <- PAS[,c("H1_COPE_18","H1_COPE_28")]*5/4 #rescale
+data_en$PASMean <- rowMeans(PAS)
+
+#CORONA Stressors:
+term <- "CE_"
+CE <- grep(term, names(data_en))
+CE <- CE[1:30]
+data_en$CEcount <- rowSums(data_en[CE] >0) #stressor count
+
+
+
 
 # identify NAs, subjects to be excluded entirely..
