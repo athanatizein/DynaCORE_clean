@@ -29,7 +29,7 @@ rename <- function(df){
   names(df)[61] <- "tested.pos"
   names(df)[63] <- "tested.pos.symptoms"
   names(df)[64] <- "quarantine"
-  names(df)[66] <- "C22_measure2"
+  names(df)[66] <- "C22_measures"
   names(df)[67] <- "C23_compliance"
   names(df)[68] <- "CM_01"
   names(df)[69] <- "CM_02"
