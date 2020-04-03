@@ -245,7 +245,7 @@ data_en$GEweighted <- rowSums(data_en[GE])/5 #weighted
 data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 
 # exclude subjects with very short completion time
-data_en$Respondent.ID[which(data_en$completionTime < 4)]<- NA
+# data_en$Respondent.ID[which(data_en$completionTime < 400)]<- NA
 
 ##### exclude subjects not from Europe
 
