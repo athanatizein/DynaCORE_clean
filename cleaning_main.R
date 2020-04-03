@@ -76,6 +76,7 @@ data_en$C23_compliance = as.numeric(data_en$C23_compliance)
 
 ## date and completion time ##
 
+#split weird month-day-year date + time col into two col, one with the weird date format, one with correct time
 for(i in 1:length(data_en$Respondent.ID)){
   start = strsplit(data_en$Start.Date[i], " ")
   data_en$Start.Date[i] = start[[1]][1]
@@ -86,13 +87,25 @@ for(i in 1:length(data_en$Respondent.ID)){
   data_en$End.Time[i] = paste(end[[1]][2], end[[1]][3])
 }
 
-# put in proper date format - this is a bit tricky
-#as.POSIXlt(data_en$Start.Date)
-#as.numeric(now)
-#[1] 1.262e+09
-#R> now + 10  # adds 10 seconds
-#[1] "2009-12-25 18:39:21 CST"
+#convert month-day-year to year-month-day date
+data_en$Start.Date = as.Date(data_en$Start.Date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
+data_en$End.Date = as.Date(data_en$End.Date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
+#date as POSIXlt
+data_en$Start.Date = as.POSIXlt(paste(data_en$Start.Date), tz = "Europe/Berlin", format="%Y-%m-%d")
+data_en$End.Date = as.POSIXlt(paste(data_en$End.Date), tz = "Europe/Berlin", format="%Y-%m-%d")
+#date+time as POSIXlt
+data_en$Start.DateTime = as.POSIXlt(paste(data_en$Start.Date, data_en$Start.Time), tz = "Europe/Berlin", format="%Y-%m-%d %H:%M:%S %p")
+data_en$End.DateTime = as.POSIXlt(paste(data_en$End.Date, data_en$End.Time), tz = "Europe/Berlin", format="%Y-%m-%d %H:%M:%S %p")
+# #test
+# data_en$Start.Date[4] #should give year/month/day GMT
+# data_en$End.Date[4] #should give year/month/day GMT
+# data_en$Start.DateTime[4] #should give year/month/day hour/minutes/seconds GMT
+# data_en$End.DateTime[4] #should give year/month/day hour/minutes/seconds GMT
 
+#completion time
+data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime) 
+# #test
+# data_en$completionTime[3] #gives time difference in minutes
 
 #### age #####
 
