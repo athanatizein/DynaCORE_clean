@@ -39,7 +39,18 @@ xx = which(!is.na(data_en$Respondent.ID))
 
 
 
-#################### plausibility checks ########################
+#################### plausibility checks & basic formatting ########################
+
+df$language = as.factor(df$language)
+df$Respondent.ID = as.factor(df$Respondent.ID )
+df$Collector.ID = as.factor(df$Collector.ID)
+df$older.or.18 = as.factor(df$older.or.18)
+df$consent = as.factor(df$consent)
+df$gender = as.factor(df$gender)
+df$nationality = as.factor(df$nationality)
+df$nationality = as.factor(df$nationality)
+df$relationship.status = as.factor(df$relationship.status)
+df$cohabitants.underage = as.numeric(df$cohabitants.underage)
 
 #### age #####
 
@@ -71,6 +82,8 @@ for(i in 1:length(data_en$Respondent.ID)){
   x = strsplit(data_en$Start.Date[i], " ")
 }
 data_en$Start.Time = data_en$Start.Date[, 4:5]
+
+
 ################### restructure variables ########################
 
 data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)

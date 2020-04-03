@@ -4,20 +4,7 @@ formatting <- function(data){
   
   df = data
 ################### confounds ########################
-  
-  df$language = as.factor(df$language)
-  df$Respondent.ID = as.factor(df$Respondent.ID )
-  df$Collector.ID = as.factor(df$Collector.ID)
-  df$age = as.numeric(as.character(unlist(df$age)))
-  
-  df$older.or.18 = as.factor(df$older.or.18)
-  df$consent = as.factor(df$consent)
-  df$gender = as.factor(df$gender)
-  df$nationality = as.factor(df$nationality)
-  df$nationality = as.factor(df$nationality)
-  df$relationship.status = as.factor(df$relationship.status)
-  df$cohabitants.underage = as.numeric(df$cohabitants.underage)
-  
+
   # While it is possible to use grepl to match the strings in multiple choice questions, I was not sure if the text will be different depending on the language of the survey. So I tried a workaround based on position in the survey only - LP
   
   # to do based on text, use:
@@ -132,27 +119,13 @@ formatting <- function(data){
     # as.Date(data_en$)
     
     # rank df$illness.prone
-  
-  data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)
-  
-  #GHQ: 
-  term <- "CM"
-  variables <- grep(term, names(data_en))
-  GHQrecode <- function(x){recode(x, '1'=0L, '2'=1L, '3'=2L, '4'=3L)}
-  data_en[variables] <- lapply(data_en[variables], GHQrecode)
-  
-  #SOZU: doesnt need recoding
-  
-  
-  
-  
-  '''  
+    
   #GHQ-12: 
   GHQfactor <- function(x){factor(x, levels = c("Not at all", "No more than usual", "Rather more than usual", "Much more than usual"))}
   term <- "CM"
-  variables <- grep(term, names(data_en))
-  #data_ger[variables] <- lapply(data_ger[variables], GHQfactor)
-  #data_ger[variables] <- lapply(data_ger[variables], as.numeric)
+  variables <- grep(term, names(data_ger))
+  data_ger[variables] <- lapply(data_ger[variables], GHQfactor)
+  data_ger[variables] <- lapply(data_ger[variables], as.numeric)
   
   #SOZU K-10:
   SOZUfactor <- function(x){factor(x, levels= c("Does not apply at all", "Hardly applies", "Somewhat applies", "Rather applies", "Completely applies" ))}
@@ -162,7 +135,7 @@ formatting <- function(data){
   data_ger[variables] <- lapply(data_ger[variables], SOZUfactor)
   data_ger[variables] <- lapply(data_ger[variables], as.numeric)
   
-  
+  '''
   (1) Does not apply at all
   (2) Hardly applies
   (3) Somewhat applies
