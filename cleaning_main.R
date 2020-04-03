@@ -11,13 +11,10 @@ require(dplyr)
 # source
 
 # load data and add column indicating the origin of the data
-data_ger = read.csv("DynaCORE_test_data_ger.csv", sep = ",", stringsAsFactors = FALSE)
-data_ger$survey_country = as.factor("ger")
+data_en = read.csv("DynaCORE_test_data_en.csv", sep = ",", stringsAsFactors = FALSE)
+data_en$survey_country = as.factor("en")
 
-# VARIABLES 1-75: rename question columns and restructure format 
-# needs to be hard coded to apply to all languages
-
-data_ger = rename(data_ger)
+x = rename(data_en)
 
 # combine files from multiple languages
 
@@ -26,14 +23,20 @@ data_ger = rename(data_ger)
 # 
 # data_xy = read.csv("DynaCORE_test_data_xx.csv", sep = ",", stringsAsFactors = FALSE)
 # data_xy$survey_country = as.factor("xy")
-# data_all = rbind(data_ger, data_xx, data_xy)
+# data_all = rbind(data_en, data_xx, data_xy)
 
+################### general cleaning ########################
 
 # remove first row and columns that are only NA
-data_ger = data_ger[, colSums(is.na(data_ger)) != nrow(data_ger)]
-data_ger = data_ger[-1,]
-xx = which(!is.na(data_ger$Respondent.ID))
+data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
+data_en = data_en[-1,]
+xx = which(!is.na(data_en$Respondent.ID))
 # identify NAs, subjects to be excluded entirely..
 
-# compile variables of interest
+#################### plausibility checks ########################
+
+
+
+
+################### restructure variables ########################
 
