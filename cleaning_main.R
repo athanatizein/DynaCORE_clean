@@ -136,6 +136,9 @@ for(i in 1:length(data_en$Respondent.ID)){
 
 #### eduation #####
 
+#code below (between .'s) does not work properly, it only extracts the first number mentioned. As alternative I suggest extracting all numbers and then summing them up
+
+#.............................Delete below....................................
 # extract the numeric component of free form education response
 numextract <- function(string){ 
   str_extract(string, "\\-*\\d+\\.*\\d*")
@@ -159,11 +162,30 @@ for(i in 1:length(data_en$Respondent.ID)){
     }
   }
 }
+#.............................Delete above....................................
 
+
+#=============================replacement code start================================
+
+# #test lines 1
+# data_en$education[1] = "5 primary school 10 highschool" #creates example of sentence input
+
+
+#run code
+data_en$educationNum <- sapply(str_extract_all(data_en$education, "[0-9]+"), 
+                               function(i) sum(as.numeric(i)))
+                               
+# #test lines 2
+# data_en$education[1] #view raw input, note that this was specified in test lines 1
+# data_en$educationNum[1] #should say 15
+                               
+                               
+#=============================replacement code end================================
+                               
 # remove unnecessary columns 
 xx = grep("X", colnames(data_en))
 data_en = data_en[-xx]
-
+                               
 ################### restructure variables ########################
 
 data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)
