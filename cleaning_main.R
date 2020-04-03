@@ -25,6 +25,10 @@ require(stringr)
 # source("/.../DynaCORE_clean/rename.R")
 # source("/.../DynaCORE_clean/formatting.R")
 
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
 # load data and add column indicating the origin of the data
 data_en = read.csv("DynaCORE_test_answer_number.csv", sep = ",", stringsAsFactors = FALSE)
 data_en$survey_country = as.factor("en")
@@ -34,9 +38,7 @@ data_en = formatting(data_en) #group occupation + status in lists
 
 ################### general cleaning ########################
 
-# remove rows without respondent ID and columns that are only NA
-data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
-
+# remove rows without respondent ID
 xx = which(is.na(data_en$Respondent.ID))
 data_en = data_en[-xx,]
 # note that in the real data, the above step will also exclude the column IP address
@@ -61,28 +63,28 @@ data_en$consent = as.factor(data_en$consent)
 data_en$gender = as.factor(data_en$gender)
 data_en$nationality = as.factor(data_en$nationality)
 data_en$relationship.status = as.factor(data_en$relationship.status)
+data_en$cohabitants = as.factor(data_en$cohabitants)
 data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 data_en$risk.group = as.factor(data_en$risk.group)
 data_en$country.residence = as.factor(data_en$country.residence)
 data_en$away.currently = as.factor(data_en$away.currently)
 data_en$away.country = as.factor(data_en$away.country)
-data_en$income = factor(data_en$income, order = TRUE)
-data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
 data_en$diagnosed.mental.health = as.factor(data_en$diagnosed.mental.health)
 data_en$tested.pos = as.factor(data_en$tested.pos)
-data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
 data_en$quarantine = as.factor(data_en$quarantine)
+
+data_en$income = factor(data_en$income, order = TRUE)
+data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
+data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
+
 data_en$C22_measures = as.numeric(data_en$C22_measures)
 data_en$C23_compliance = as.numeric(data_en$C23_compliance)
-
-data_en$cohabitants = as.factor(data_en$cohabitants)
 
 data_en$cohabs.cont = as.numeric(data_en$cohabitants)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 3)] = 3.5
 data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
-
-# extract the numeric component of X.28 based on the new solution
-#data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(data_en$X.28)
+xx = numextract(data_en$X.28)
+data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
 
 
 ## date and completion time ##
@@ -122,11 +124,7 @@ data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime)
 # data_en$completionTime[3] #gives time difference in minutes
 
 #### age #####
-
 # extract the numeric component of free form age response
-numextract <- function(string){ 
-  str_extract(string, "\\-*\\d+\\.*\\d*")
-} 
 
 # # test
 # data_en$age[2] = "2o"
@@ -245,6 +243,13 @@ data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
 
 # exclude subjects with no response variance (check block wise)
 
+# calculate variance
+variance = lapply(data_en[GHQ],var())
+variance = lapply(data_en[SOZU],var())
+#ASKU
+#BRS
+#BFI
+#..
 
 data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
 
@@ -258,6 +263,7 @@ data_en = data_en[-xx,]
 xx = grep("X", colnames(data_en))
 data_en = data_en[-xx]
 
+data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
 
 ##### quality control #####
 
