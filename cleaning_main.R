@@ -7,6 +7,7 @@
 rm(list = ls())
 require(foreign)
 require(dplyr)
+require(stringr)
 #require(plyr)
 # run the functions 'rename.R', 'formatting.R', ... or source:
 # source("/.../DynaCORE_clean/rename.R")
@@ -37,8 +38,27 @@ xx = which(!is.na(data_en$Respondent.ID))
 
 #################### plausibility checks ########################
 
+#### age #####
 
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
 
+# test
+data_en$age[2] = "22 years old"
+data_en$age[4] = "I am 711 years old"
+
+for(i in 1:length(df$Respondent.ID)){
+  data_en$age[i] = numextract(data_en$age[i])
+}
+
+data_en$age = as.numeric(data_en$age)
+
+# for(i in 1:length(df$Respondent.ID)){
+#   if(data_en$age[i] < 18 | data_en$age[i] > 100) {
+#     data_en$age = NA
+#   }
+# }  
 
 ################### restructure variables ########################
 
