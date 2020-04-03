@@ -115,10 +115,8 @@ formatting <- function(data){
     df$occupational.status[i] = list(x)
   }
 
-    # extract time from date variable
-    # as.Date(data_en$)
-    
-    # rank df$illness.prone
+  
+  
     
   #GHQ-12: 
   GHQfactor <- function(x){factor(x, levels = c("Not at all", "No more than usual", "Rather more than usual", "Much more than usual"))}

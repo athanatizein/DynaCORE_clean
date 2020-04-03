@@ -41,16 +41,16 @@ xx = which(!is.na(data_en$Respondent.ID))
 
 #################### plausibility checks & basic formatting ########################
 
-df$language = as.factor(df$language)
-df$Respondent.ID = as.factor(df$Respondent.ID )
-df$Collector.ID = as.factor(df$Collector.ID)
-df$older.or.18 = as.factor(df$older.or.18)
-df$consent = as.factor(df$consent)
-df$gender = as.factor(df$gender)
-df$nationality = as.factor(df$nationality)
-df$nationality = as.factor(df$nationality)
-df$relationship.status = as.factor(df$relationship.status)
-df$cohabitants.underage = as.numeric(df$cohabitants.underage)
+data_en$language = as.factor(data_en$language)
+data_en$Respondent.ID = as.factor(data_en$Respondent.ID )
+data_en$Collector.ID = as.factor(data_en$Collector.ID)
+data_en$older.or.18 = as.factor(data_en$older.or.18)
+data_en$consent = as.factor(data_en$consent)
+data_en$gender = as.factor(data_en$gender)
+data_en$nationality = as.factor(data_en$nationality)
+data_en$nationality = as.factor(data_en$nationality)
+data_en$relationship.status = as.factor(data_en$relationship.status)
+data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 
 #### age #####
 
@@ -76,13 +76,28 @@ for(i in 1:length(data_en$Respondent.ID)){
 
 ## date and completion time ##
 
-as.Date(data_en$Start.Date[i],)
-unlist(strsplit("a.b.c", "\\."))
 for(i in 1:length(data_en$Respondent.ID)){
-  x = strsplit(data_en$Start.Date[i], " ")
+  start = strsplit(data_en$Start.Date[i], " ")
+  data_en$Start.Date[i] = start[[1]][1]
+  data_en$Start.Time[i] = paste(start[[1]][2], start[[1]][3])
+  
+  end = strsplit(data_en$End.Date[i], " ")
+  data_en$End.Date[i] = end[[1]][1]
+  data_en$End.Time[i] = paste(end[[1]][2], end[[1]][3])
 }
-data_en$Start.Time = data_en$Start.Date[, 4:5]
 
+# put in proper date format - this is a bit tricky
+#as.POSIXlt(data_en$Start.Date)
+#as.numeric(now)
+#[1] 1.262e+09
+#R> now + 10  # adds 10 seconds
+#[1] "2009-12-25 18:39:21 CST"
+
+
+
+# remove unnecessary columns 
+xx = grep("X", colnames(data_en))
+data_en = data_en[-xx]
 
 ################### restructure variables ########################
 
