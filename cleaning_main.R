@@ -18,6 +18,7 @@ require(foreign)
 require(dplyr)
 require(stringr)
 require(BBmisc)
+require(stringr)
 #require(plyr)
 # run the functions 'rename.R', 'formatting.R', ... or source:
 # source("/.../DynaCORE_clean/rename.R")
@@ -28,6 +29,16 @@ data_en = read.csv("DynaCORE_test_answer_number.csv", sep = ",", stringsAsFactor
 data_en$survey_country = as.factor("en")
 
 data_en = rename(data_en)
+data_en = formatting(data_en) #group occupation + status in lists
+
+################### general cleaning ########################
+
+# remove rows without respondent ID and columns that are only NA
+data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
+
+xx = which(is.na(data_en$Respondent.ID))
+data_en = data_en[-xx,]
+# note that in the real data, the above step will also exclude the column IP address
 
 ########## combine files from multiple languages
 
@@ -37,16 +48,6 @@ data_en = rename(data_en)
 # data_xy = read.csv("DynaCORE_test_data_xx.csv", sep = ",", stringsAsFactors = FALSE)
 # data_xy$survey_country = as.factor("xy")
 # data_all = rbind(data_en, data_xx, data_xy)
-
-################### general cleaning ########################
-
-# remove first row and columns that are only NA
-data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
-data_en = data_en[-1,]
-xx = which(!is.na(data_en$Respondent.ID))
-
-# note that in the real data, the above step will also exclude the column IP address
-
 
 
 #################### plausibility checks & basic formatting ########################
@@ -59,7 +60,6 @@ data_en$consent = as.factor(data_en$consent)
 data_en$gender = as.factor(data_en$gender)
 data_en$nationality = as.factor(data_en$nationality)
 data_en$relationship.status = as.factor(data_en$relationship.status)
-data_en$cohabitants = as.numeric(data_en$cohabitants)
 data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 data_en$risk.group = as.factor(data_en$risk.group)
 data_en$country.residence = as.factor(data_en$country.residence)
@@ -73,6 +73,16 @@ data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
 data_en$quarantine = as.factor(data_en$quarantine)
 data_en$C22_measures = as.numeric(data_en$C22_measures)
 data_en$C23_compliance = as.numeric(data_en$C23_compliance)
+
+data_en$cohabitants = as.factor(data_en$cohabitants)
+
+data_en$cohabs.cont = as.numeric(data_en$cohabitants)
+data_en$cohabs.cont[which(data_en$cohabs.cont == 3)] = 3.5
+data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
+
+# extract the numeric component of X.28 based on the new solution
+#data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(data_en$X.28)
+
 
 ## date and completion time ##
 
@@ -115,20 +125,16 @@ numextract <- function(string){
 } 
 
 # # test
-# data_en$age[2] = "22 years old"
+# data_en$age[2] = "2o"
 # data_en$age[4] = "I am 711 years old"
 
+data_en$age = gsub("o", "0", data_en$age)
+
+# if any ages are 0, this could be due to a leading o
+ 
 data_en$age = numextract(data_en$age)
 data_en$age = as.numeric(data_en$age)
-
-for(i in 1:length(data_en$Respondent.ID)){
-  if (!is.na(data_en$age[i])) {
-    if(data_en$age[i] < 18 || data_en$age[i] > 100) {
-      data_en$age[i] = NA
-    }
-  }
-}
-
+data_en$age[which(data_en$age > 100)] = NA
 
 #### eduation #####
 
@@ -147,7 +153,7 @@ data_en$education = as.numeric(data_en$education)
 
 for(i in 1:length(data_en$Respondent.ID)){
   if (!is.na(data_en$education[i])) {
-    if(data_en$education[i] > data_en$age[i]-3){
+    if(data_en$education[i] > data_en$age[i]){
       data_en$education[i] = NA
     }
     if(!is.na(data_en$education[i]) && data_en$education[i] > 10){
@@ -155,10 +161,6 @@ for(i in 1:length(data_en$Respondent.ID)){
     }
   }
 }
-
-# remove unnecessary columns 
-xx = grep("X", colnames(data_en))
-data_en = data_en[-xx]
 
 ################### restructure variables ########################
 
@@ -230,12 +232,31 @@ data_en$CEcount <- rowSums(data_en[CE] >0) #stressor count
 
 
 
+##################### identify subjects to exclude ##############
+# exclude subjects under 18
+data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 
-# identify NAs, subjects to be excluded entirely..
+# exclude subjects with very short completion time
+data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
 
+# exclude subjects with no response variance (check block wise)
+
+
+data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
+
+xx = which(is.na(data_en$Respondent.ID))
+data_en = data_en[-xx,]
+
+#xx = which(!is.na(data_en$Respondent.ID))
+
+
+# remove unnecessary columns 
+xx = grep("X", colnames(data_en))
+data_en = data_en[-xx]
 
 
 ##### quality control #####
+
 # "education.fulltext" includes the full answer for education for anyone with less than 10 years.
 # check these answers to make sure this was not due to typos or nor summing the total years of education
 
