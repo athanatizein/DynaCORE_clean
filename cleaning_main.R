@@ -1,6 +1,6 @@
 # pipeline template to clean and structure data from the DynaCORE project for analysis
 # contributors:
-# Matthias Zerban ()
+# Matthias Zerban (matthias.zerban@unimedizin-mainz.de)
 # Kenneth Yuen ()
 # Lara Puhlmann (puhlmann@cbs.mpg.de)
 
