@@ -14,7 +14,7 @@ require(stringr)
 # source("/.../DynaCORE_clean/formatting.R")
 
 # load data and add column indicating the origin of the data
-data_en = read.csv("DynaCORE_test_data_en.csv", sep = ",", stringsAsFactors = FALSE)
+data_en = read.csv("DynaCORE_test_answer_number.csv", sep = ",", stringsAsFactors = FALSE)
 data_en$survey_country = as.factor("en")
 
 data_en = rename(data_en)
@@ -73,5 +73,24 @@ for(i in 1:length(data_en$Respondent.ID)){
 data_en$Start.Time = data_en$Start.Date[, 4:5]
 ################### restructure variables ########################
 
+data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)
+
+#GHQ: 
+term <- "CM"
+GHQ <- grep(term, names(data_en))
+GHQrecode <- function(x){recode(x, '1'=0L, '2'=1L, '3'=2L, '4'=3L)}
+data_en[GHQ] <- lapply(data_en[GHQ], GHQrecode)
+
+data_en$GHQsum <- rowSums(data_en[GHQ])
+
+#SOZU:
+
+term <- "H2_"
+SOZU <- grep(term, names(data_en))
+SOZU <- variables[1:7]
+
+data_en$SOZUSum <- rowSums(data_en[SOZU])
+
+#
 
 # identify NAs, subjects to be excluded entirely..
