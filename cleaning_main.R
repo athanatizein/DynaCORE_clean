@@ -76,6 +76,12 @@ data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
 xx = numextract(data_en$X.28)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
 
+# select cases where more/same people in household are underage than total household
+xx = which(data_en$cohabs.cont+0.5<=data_en$cohabitants.underage)
+data_en$cohabitants[xx] = NA
+data_en$cohabs.cont[xx] = NA
+data_en$cohabitants.underage[xx] = NA
+
 # I think mental health is wrongly coded as 0 = yes, 1 = no, so recode ONCE ONLY:
 data_en$diagnosed.mental.health = revalue(data_en$diagnosed.mental.health, c("0"="1", "1"="0"))
 
@@ -95,15 +101,14 @@ for(i in 1:length(data_en$Respondent.ID)){
 #line of code that deals with different separators that occur in surveymonkey raw data for date outputs (e.g. mm/dd/yyyy vs. mm.dd.yyyy).
 data_en$Start.Date = gsub(".", "/", data_en$Start.Date, fixed=TRUE) #mm.dd.yyyy becomes mm/dd/yyyy
 
-#convert month-day-year to year-month-day date
+#convert month-day-year to year-month-day date, then to POSIXlt
 data_en$Start.Date = as.Date(data_en$Start.Date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
 data_en$End.Date = as.Date(data_en$End.Date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
-#date as POSIXlt
 data_en$Start.Date = as.POSIXlt(paste(data_en$Start.Date), tz = "Europe/Berlin", format="%Y-%m-%d")
 data_en$End.Date = as.POSIXlt(paste(data_en$End.Date), tz = "Europe/Berlin", format="%Y-%m-%d")
-#date+time as POSIXlt
 data_en$Start.DateTime = as.POSIXlt(paste(data_en$Start.Date, data_en$Start.Time), tz = "Europe/Berlin", format="%Y-%m-%d %H:%M:%S %p")
 data_en$End.DateTime = as.POSIXlt(paste(data_en$End.Date, data_en$End.Time), tz = "Europe/Berlin", format="%Y-%m-%d %H:%M:%S %p")
+
 # #test
 # data_en$Start.Date[4] #should give year/month/day GMT
 # data_en$End.Date[4] #should give year/month/day GMT
@@ -248,7 +253,7 @@ data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 # data_en$Respondent.ID[which(data_en$completionTime < 400)]<- NA
 
 ##### exclude subjects not from Europe
-Europe = c(2, 4, 11, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 80, 81, 86, 88, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 148, 158, 162, 163, 168, 174, 175, 180, 186, 191, 193)
+Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 80, 81, 86, 88, 92, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 148, 154, 158, 162, 163, 168, 174, 175, 180, 186, 191, 193)
 
 xx = which(data_en$country.residence %in% Europe)
 data_en = data_en[xx,]
