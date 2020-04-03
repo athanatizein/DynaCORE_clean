@@ -49,7 +49,50 @@ xx = which(!is.na(data_en$Respondent.ID))
 
 
 
-#################### plausibility checks ########################
+#################### plausibility checks & basic formatting ########################
+
+data_en$language = as.factor(data_en$language)
+data_en$Respondent.ID = as.factor(data_en$Respondent.ID )
+data_en$Collector.ID = as.factor(data_en$Collector.ID)
+data_en$older.or.18 = as.factor(data_en$older.or.18)
+data_en$consent = as.factor(data_en$consent)
+data_en$gender = as.factor(data_en$gender)
+data_en$nationality = as.factor(data_en$nationality)
+data_en$relationship.status = as.factor(data_en$relationship.status)
+data_en$cohabitants = as.numeric(data_en$cohabitants)
+data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
+data_en$risk.group = as.factor(data_en$risk.group)
+data_en$country.residence = as.factor(data_en$country.residence)
+data_en$away.currently = as.factor(data_en$away.currently)
+data_en$away.country = as.factor(data_en$away.country)
+data_en$income = factor(data_en$income, order = TRUE)
+data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
+data_en$diagnosed.mental.health = as.factor(data_en$diagnosed.mental.health)
+data_en$tested.pos = as.factor(data_en$tested.pos)
+data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
+data_en$quarantine = as.factor(data_en$quarantine)
+data_en$C22_measures = as.numeric(data_en$C22_measures)
+data_en$C23_compliance = as.numeric(data_en$C23_compliance)
+
+## date and completion time ##
+
+for(i in 1:length(data_en$Respondent.ID)){
+  start = strsplit(data_en$Start.Date[i], " ")
+  data_en$Start.Date[i] = start[[1]][1]
+  data_en$Start.Time[i] = paste(start[[1]][2], start[[1]][3])
+  
+  end = strsplit(data_en$End.Date[i], " ")
+  data_en$End.Date[i] = end[[1]][1]
+  data_en$End.Time[i] = paste(end[[1]][2], end[[1]][3])
+}
+
+# put in proper date format - this is a bit tricky
+#as.POSIXlt(data_en$Start.Date)
+#as.numeric(now)
+#[1] 1.262e+09
+#R> now + 10  # adds 10 seconds
+#[1] "2009-12-25 18:39:21 CST"
+
 
 #### age #####
 
@@ -72,6 +115,37 @@ for(i in 1:length(data_en$Respondent.ID)){
     }
   }
 }
+
+
+#### eduation #####
+
+# extract the numeric component of free form education response
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+# # test
+# data_en$education[2] = "22 years"
+# data_en$education[4] = "5 primary school 10 highschool"
+
+data_en$education.fulltext = data_en$education
+data_en$education = numextract(data_en$education)
+data_en$education = as.numeric(data_en$education)
+
+for(i in 1:length(data_en$Respondent.ID)){
+  if (!is.na(data_en$education[i])) {
+    if(data_en$education[i] > data_en$age[i]-3){
+      data_en$education[i] = NA
+    }
+    if(!is.na(data_en$education[i]) && data_en$education[i] > 10){
+      data_en$education.fulltext[i] = NA
+    }
+  }
+}
+
+# remove unnecessary columns 
+xx = grep("X", colnames(data_en))
+data_en = data_en[-xx]
 
 ################### restructure variables ########################
 
@@ -143,3 +217,10 @@ data_en$CEcount <- rowSums(data_en[CE] >0) #stressor count
 
 
 # identify NAs, subjects to be excluded entirely..
+
+
+
+##### quality control #####
+# "education.fulltext" includes the full answer for education for anyone with less than 10 years.
+# check these answers to make sure this was not due to typos or nor summing the total years of education
+
