@@ -245,6 +245,25 @@ data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
 
 # calculate variance
 variance = lapply(data_en[GHQ],var())
+
+#------------------------------Suggestion: calculating variance per questionnaire--------------------------
+for (i in 1:nrow(data_en)){ 
+  print(var(as.vector(as.matrix(data_subset[i, 5:10])))) #5:10 reflects column 5 to 10, change accordingly per questionnaire 
+}
+#add variance as an additional column in the data frame
+data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[5:10]))) #change 5:10 
+                          
+###Comment: if the columns are not neatly lined up (e.g. following the 5:10 example) you can also use a vector. In it, specify column names, example below
+# x = c("colname1", "colname2", "colname3", "colname4", "colname5", "colname6") #specify columns per questionnaire
+# for (i in 1:nrow(data_en)){ 
+#   print(var(as.vector(as.matrix(data_subset[i, x])))) #x reflects columns used, change accordingly per questionnaire (i.e. change with another vector) 
+# }
+# #add variance as an additional column in the data frame
+# data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[x]))) 
+                    
+                          
+#------------------------------Suggestion end--------------------------
+
 variance = lapply(data_en[SOZU],var())
 #ASKU
 #BRS
