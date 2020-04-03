@@ -248,8 +248,9 @@ data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 # data_en$Respondent.ID[which(data_en$completionTime < 400)]<- NA
 
 ##### exclude subjects not from Europe
-
-
+Europe = c(11, 28, 48, 51)
+x = which(data_en$country.residence %in% Europe)
+data_en = data_en[xx]
 
 ### exclude subjects with no response variance (check block-wise)
 var = matrix(NA, nrow = length(data_en$Respondent.ID), ncol = 8)
