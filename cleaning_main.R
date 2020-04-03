@@ -213,6 +213,8 @@ CE <- grep(term, names(data_en))
 CE <- CE[1:30]
 data_en$CEcount <- rowSums(data_en[CE] >0) #stressor count
 
+# I will procede working here later/MZ
+
 
 
 
