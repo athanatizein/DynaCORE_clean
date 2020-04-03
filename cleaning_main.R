@@ -19,7 +19,7 @@ data_en$survey_country = as.factor("en")
 
 data_en = rename(data_en)
 
-# combine files from multiple languages
+########## combine files from multiple languages
 
 # data_xx = read.csv("DynaCORE_test_data_xx.csv", sep = ",", stringsAsFactors = FALSE)
 # data_xx$survey_country = as.factor("xx")
@@ -38,7 +38,6 @@ xx = which(!is.na(data_en$Respondent.ID))
 # note that in the real data, the above step will also exclude the column IP address
 
 
-# identify NAs, subjects to be excluded entirely..
 
 #################### plausibility checks ########################
 
@@ -49,14 +48,11 @@ numextract <- function(string){
   str_extract(string, "\\-*\\d+\\.*\\d*")
 } 
 
-# test
-data_en$age[2] = "22 years old"
-data_en$age[4] = "I am 711 years old"
+# # test
+# data_en$age[2] = "22 years old"
+# data_en$age[4] = "I am 711 years old"
 
-for(i in 1:length(data_en$Respondent.ID)){
-  data_en$age[i] = numextract(data_en$age[i])
-}
-
+data_en$age = numextract(data_en$age)
 data_en$age = as.numeric(data_en$age)
 
 for(i in 1:length(data_en$Respondent.ID)){
@@ -69,3 +65,5 @@ for(i in 1:length(data_en$Respondent.ID)){
 
 ################### restructure variables ########################
 
+
+# identify NAs, subjects to be excluded entirely..
