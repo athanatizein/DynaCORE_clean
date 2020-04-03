@@ -31,6 +31,8 @@ numextract <- function(string){
 
 # load data and add column indicating the origin of the data
 data_en = read.csv("DynaCORE_test_answer_number.csv", sep = ",", stringsAsFactors = FALSE)
+#data_test = read.csv("DynaCORE_test_data_firstround.csv", sep = ",", stringsAsFactors = FALSE)
+
 data_en$survey_country = as.factor("en")
 
 data_en = rename(data_en)
@@ -54,29 +56,13 @@ data_en = data_en[-xx,]
 
 
 #################### plausibility checks & basic formatting ########################
-
-data_en$language = as.factor(data_en$language)
-data_en$Respondent.ID = as.factor(data_en$Respondent.ID )
-data_en$Collector.ID = as.factor(data_en$Collector.ID)
-data_en$older.or.18 = as.factor(data_en$older.or.18)
-data_en$consent = as.factor(data_en$consent)
-data_en$gender = as.factor(data_en$gender)
-data_en$nationality = as.factor(data_en$nationality)
-data_en$relationship.status = as.factor(data_en$relationship.status)
-data_en$cohabitants = as.factor(data_en$cohabitants)
-data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
-data_en$risk.group = as.factor(data_en$risk.group)
-data_en$country.residence = as.factor(data_en$country.residence)
-data_en$away.currently = as.factor(data_en$away.currently)
-data_en$away.country = as.factor(data_en$away.country)
-data_en$diagnosed.mental.health = as.factor(data_en$diagnosed.mental.health)
-data_en$tested.pos = as.factor(data_en$tested.pos)
-data_en$quarantine = as.factor(data_en$quarantine)
+data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)] <- lapply(data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)], as.factor)
 
 data_en$income = factor(data_en$income, order = TRUE)
 data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
 data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
 
+data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 data_en$C22_measures = as.numeric(data_en$C22_measures)
 data_en$C23_compliance = as.numeric(data_en$C23_compliance)
 
@@ -86,8 +72,10 @@ data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
 xx = numextract(data_en$X.28)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
 
+# I think mental health is wrongly coded as 0 = yes, 1 = no, so recode ONCE ONLY:
+data_en$diagnosed.mental.health = revalue(data_en$diagnosed.mental.health, c("0"="1", "1"="0"))
 
-## date and completion time ##
+################# date and completion time ########
 
 #split weird month-day-year date + time col into two col, one with the weird date format, one with correct time
 for(i in 1:length(data_en$Respondent.ID)){
@@ -123,34 +111,37 @@ data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime)
 # #test
 # data_en$completionTime[3] #gives time difference in minutes
 
-#### age #####
-# extract the numeric component of free form age response
 
+##### date of Corona test #####
+data_en$tested.pos.date = gsub(".", "/", data_en$tested.pos.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
+data_en$tested.pos.date[which(nchar(data_en$tested.pos.date)<5)]=NA # set all that are not a date to NA
+#convert month-day-year to year-month-day date
+data_en$tested.pos.date = as.Date(data_en$tested.pos.date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
+#date as POSIXlt
+data_en$tested.pos.date = as.POSIXlt(paste(data_en$tested.pos.date), tz = "Europe/Berlin", format="%Y-%m-%d")
+
+
+###### age #####
 # # test
 # data_en$age[2] = "2o"
 # data_en$age[4] = "I am 711 years old"
 
 data_en$age = gsub("o", "0", data_en$age)
-
 # if any ages are 0, this could be due to a leading o
  
+# extract the numeric component of free form age response
 data_en$age = numextract(data_en$age)
 data_en$age = as.numeric(data_en$age)
 data_en$age[which(data_en$age > 100)] = NA
 
-#### eduation #####
-
-# extract the numeric component of free form education response
-numextract <- function(string){ 
-  str_extract(string, "\\-*\\d+\\.*\\d*")
-} 
+#### education #####
 
 # # test
 # data_en$education[2] = "22 years"
 # data_en$education[4] = "5 primary school 10 highschool"
 
 data_en$education.fulltext = data_en$education
-data_en$education = numextract(data_en$education)
+data_en$education = numextract(data_en$education) # extract the numeric component of free form education response
 data_en$education = as.numeric(data_en$education)
 
 for(i in 1:length(data_en$Respondent.ID)){
@@ -250,12 +241,33 @@ data_en$GEweighted <- rowSums(data_en[GE])/5 #weighted
 data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 
 # exclude subjects with very short completion time
-data_en$Respondent.ID[which(data_en$completionTime < 18)]<- NA
+data_en$Respondent.ID[which(data_en$completionTime < 4)]<- NA
 
 # exclude subjects with no response variance (check block wise)
 
 # calculate variance
+var(as.vector(as.matrix(data[1, 5:10]))) #calculates variance for row 1, column 5:10
 variance = lapply(data_en[GHQ],var())
+
+#------------------------------Suggestion: calculating variance per questionnaire--------------------------
+for (i in 1:nrow(data_en)){ 
+  print(var(as.vector(as.matrix(data_en[i, 5:10])))) #5:10 reflects column 5 to 10, change accordingly per questionnaire 
+}
+#add variance as an additional column in the data frame
+data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[5:10]))) #change 5:10 
+                          
+###Comment: if the columns are not neatly lined up (e.g. following the 5:10 example) you can also use a vector. In it, specify column names, example below
+# x = c("colname1", "colname2", "colname3", "colname4", "colname5", "colname6") #specify columns per questionnaire
+# for (i in 1:nrow(data_en)){ 
+#   print(var(as.vector(as.matrix(data_en[i, x])))) #x reflects columns used, change accordingly per questionnaire (i.e. change with another vector) 
+# }
+
+# #add variance as an additional column in the data frame
+# data_en$variance_Q1 <- apply(data_en,1,function(row) var(as.vector(row[x]))) 
+                    
+                          
+#------------------------------Suggestion end--------------------------
+
 variance = lapply(data_en[SOZU],var())
 #ASKU
 #BRS
