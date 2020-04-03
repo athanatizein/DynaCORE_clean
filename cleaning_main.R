@@ -64,8 +64,13 @@ for(i in 1:length(data_en$Respondent.ID)){
 }
 
 ## date and completion time ##
-as.Date(data_en$Start.Date)
 
+as.Date(data_en$Start.Date[i],)
+unlist(strsplit("a.b.c", "\\."))
+for(i in 1:length(data_en$Respondent.ID)){
+  x = strsplit(data_en$Start.Date[i], " ")
+}
+data_en$Start.Time = data_en$Start.Date[, 4:5]
 ################### restructure variables ########################
 
 
