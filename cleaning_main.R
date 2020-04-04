@@ -38,6 +38,7 @@ data_en$survey_country = as.factor("en")
 data_en = rename(data_en)
 data_en = formatting(data_en) #group occupation + status in lists
 
+
 ################### general cleaning ########################
 
 # remove rows without respondent ID
@@ -55,12 +56,8 @@ data_en = data_en[-xx,]
 # data_all = rbind(data_en, data_xx, data_xy)
 
 
-#################### plausibility checks & basic formatting ########################
+#################### covariates: plausibility checks & basic formatting ########################
 data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)] <- lapply(data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)], as.factor)
-
-# set responses for place of location to NA if away currently was answered with 0
-data_en$away.country[which(data_en$away.currently==2)] <- NA
-data_en$away.city[which(data_en$away.currently==2)] <- NA
 
 data_en$income = factor(data_en$income, order = TRUE)
 data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
@@ -70,38 +67,14 @@ data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 data_en$C22_measures = as.numeric(data_en$C22_measures)
 data_en$C23_compliance = as.numeric(data_en$C23_compliance)
 
+##### cohabitants as continuous ####
 data_en$cohabs.cont = as.numeric(data_en$cohabitants)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 3)] = 3.5
 data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
 xx = numextract(data_en$X.28)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
 
-# set cases where more/same people in household are underage than total household to NA
-xx = which(data_en$cohabs.cont+0.5<=data_en$cohabitants.underage)
-data_en$cohabitants[xx] = NA
-data_en$cohabs.cont[xx] = NA
-data_en$cohabitants.underage[xx] = NA
-
-# set cases with mismatch in occulation to NA
-data_en$not.working.12 <- lapply(data_en$occupation, function(ch) grep("16", ch))
-data_en$not.working.12[sapply(data_en$not.working.12, function(x) length(x)==0)] <- NA
-
-employed = c("1", "2", "3", "4")
-data_en$employed.13 <- lapply(data_en$occupational.status, function(ch) grep(paste(employed, collapse="|"), ch))
-data_en$employed.13[sapply(data_en$employed.13, function(x) length(x)==0)] <- NA
-
-# find people that are unemployed in 12 but working in 13
-xx = which(!is.na(data_en$not.working.12) && !is.na(data_en$employed.13))
-data_en$occupation[xx] <- NA
-data_en$occupational.status[xx] <- NA
-
-# find people that are employed in 12 but not working in 13
-# STILL to do
-
-# I think mental health is wrongly coded as 0 = yes, 1 = no, so recode ONCE ONLY:
-data_en$diagnosed.mental.health = revalue(data_en$diagnosed.mental.health, c("0"="1", "1"="0"))
-
-################# date and completion time ########
+###### date and completion time ########
 
 #split weird month-day-year date + time col into two col, one with the weird date format, one with correct time
 for(i in 1:length(data_en$Respondent.ID)){
@@ -137,7 +110,7 @@ data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime)
 # data_en$completionTime[3] #gives time difference in minutes
 
 
-##### date of Corona test #####
+###### date of Corona test #####
 data_en$tested.pos.date = gsub(".", "/", data_en$tested.pos.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
 data_en$tested.pos.date[which(nchar(data_en$tested.pos.date)<5)]=NA # set all that are not a date to NA
 #convert month-day-year to year-month-day date
@@ -159,7 +132,7 @@ data_en$age = numextract(data_en$age)
 data_en$age = as.numeric(data_en$age)
 data_en$age[which(data_en$age > 100)] = NA
 
-#### education #####
+###### education #####
 
 # # test
 # data_en$education[2] = "22 years"
@@ -180,7 +153,53 @@ for(i in 1:length(data_en$Respondent.ID)){
   }
 }
 
-################### restructure variables ########################
+###### current.location ####
+## combines the variables "residence.country", "away.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
+##R can default character columns to factors, so first step is to make sure variables of interest are characters
+data_en[ , c("away.country" ,"residence.country") ] <- sapply( data_en[ , c("away.country" ,"residence.country") ] , as.character )
+##now we use a simple ifelse statement to create a new variable that gives us currenty location (country)
+data_en$current.location <- ifelse(data_en$away.currently == '1', data_en$away.country, data_en$residence.country)
+
+# #test
+# data_en$residence.country[2] #gives Algeria
+# data_en$away.country[2] #Gives Andorra
+# data_en$away.currently[2] #Gives Yes, so current loc should be Andorra
+# data_en$current.location[2] #gives Andorra, hooray            
+
+#### clean-up inconsistent responses ####
+# set responses for place of location to NA if away currently was answered with 0
+data_en$away.country[which(data_en$away.currently==2)] <- NA
+data_en$away.city[which(data_en$away.currently==2)] <- NA
+
+# set cases where more/same people in household are underage than total household to NA
+xx = which(data_en$cohabs.cont+0.5<=data_en$cohabitants.underage)
+data_en$cohabitants[xx] = NA
+data_en$cohabs.cont[xx] = NA
+data_en$cohabitants.underage[xx] = NA
+
+# set cases with mismatch in occulation to NA
+data_en$not.working.12 <- lapply(data_en$occupation, function(ch) grep("16", ch))
+data_en$not.working.12[sapply(data_en$not.working.12, function(x) length(x)==0)] <- NA
+
+### Employment
+employed = c("1", "2", "3", "4")
+data_en$employed.13 <- lapply(data_en$occupational.status, function(ch) grep(paste(employed, collapse="|"), ch))
+data_en$employed.13[sapply(data_en$employed.13, function(x) length(x)==0)] <- NA
+
+# find people that are unemployed in 12 but working in 13
+xx = which(!is.na(data_en$not.working.12) && !is.na(data_en$employed.13))
+data_en$occupation[xx] <- NA
+data_en$occupational.status[xx] <- NA
+
+# find people that are employed in 12 but not working in 13
+# STILL to do
+
+# I think mental health is wrongly coded as 0 = yes, 1 = no, so recode ONCE ONLY:
+data_en$diagnosed.mental.health = revalue(data_en$diagnosed.mental.health, c("0"="1", "1"="0"))
+
+
+
+################### restructure questionnaire variables ########################
 
 data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)
 
@@ -266,7 +285,7 @@ GE <- GE[1:12]
 data_en$GEcount <- rowSums(data_en[GE] >0) #stressor count
 data_en$GEweighted <- rowSums(data_en[GE])/5 #weighted
 
-#####################SR Score###################
+##################### SR Score ###################
 
 #adapted from Haakon's script
 m1 <- summary(lm(scale(GHQsum)~scale(GEcount),data= data_en))
@@ -275,6 +294,24 @@ data_en$SR_GEcount <-as.numeric(scale(resid(m1)))
 m2 <- summary(lm(scale(GHQsum)~scale(CEcount),data= data_en))
 data_en$SR_CEcount <-as.numeric(scale(resid(m2)))
 
+
+######################## subgroup selection ######################## 
+
+##### select subjects FROM Europe
+Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 77, 80, 81, 86, 88, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 154, 158, 162, 163, 168, 174, 175, 180, 191, 193)
+# for now, the above list does not include Russia (148), Kasakhstan (92) & Turkey (186), since they are trans-continental
+
+xx = which(data_en$residence.country %in% Europe)
+data_en$from.eu = 0
+data_en$from.eu[xx] = 1
+data_en$from.eu = as.factor(data_en$from.eu)
+
+##### select subjects IN Europe
+xx = which(data_en$current.location %in% Europe)
+data_en$in.eu = 0
+data_en$in.eu[xx] = 1
+data_en$in.eu = as.factor(data_en$in.eu)
+
 ##################### identify subjects to exclude ##############
 # exclude subjects under 18
 data_en$Respondent.ID[which(data_en$age < 18)]<- NA
@@ -282,12 +319,17 @@ data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 # exclude subjects with very short completion time
 # data_en$Respondent.ID[which(data_en$completionTime < 400)]<- NA
 
-##### exclude subjects not from Europe
 Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 77, 80, 81, 86, 88, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 154, 158, 162, 163, 168, 174, 175, 180, 191, 193)
 # for now, the above list does not include Russia (148), Kasakhstan (92) & Turkey (186), since they are trans-continental
 
-xx = which(data_en$country.residence %in% Europe)
-data_en = data_en[xx,]
+##### select subjects FROM Europe
+#xx = which(data_en$residence.country %in% Europe)
+
+##### select subjects IN Europe
+#xx = which(data_en$current.location %in% Europe)
+
+data_eu = data_en[xx,]
+
 
 ### exclude subjects with no response variance (check block-wise)
 var = matrix(NA, nrow = length(data_en$Respondent.ID), ncol = 8)
@@ -330,6 +372,7 @@ data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
 
 
 ######### processing covariates ############
+
 # index people who work in healthcare
 # index people who are unemployed
 
@@ -337,18 +380,6 @@ data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
 
 # list of mental health conditions
                            
-#currently location (country)
-## combines the variables "country.residence", "away.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
-##R can default character columns to factors, so first step is to make sure variables of interest are characters
-data_en[ , c("away.country" ,"country.residence") ] <- sapply( data_en[ , c("away.country" ,"country.residence") ] , as.character )
-##now we use a simple ifelse statement to create a new variable that gives us currenty location (country)
-data_en$current.location <- ifelse(data_en$away.currently == 'Yes', data_en$away.country, data_en$country.residence)
-
-# #test
-# data_en$country.residence[2] #gives Algeria
-# data_en$away.country[2] #Gives Andorra
-# data_en$away.currently[2] #Gives Yes, so current loc should be Andorra
-# data_en$current.location[2] #gives Andorra, hooray                         
 
 
 ##### quality control #####
