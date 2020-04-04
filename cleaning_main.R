@@ -208,39 +208,39 @@ data_en[,c(68:154,156:167)] <- lapply(data_en[,c(68:154,156:167)], as.numeric)
 data_en$missing <- rowSums(is.na(data_en[,c(68:154,156:167)]))
 data_en <- data_en[data_en$missing == 0,]
 
-#GHQ: 
+#Mental Health Problems 'P': 
 data_en$CM_07 <- 5 - data_en$CM_07
 term <- "CM"
 GHQ <- grep(term, names(data_en))
 GHQrecode <- function(x){recode(x, '1'=0L, '2'=1L, '3'=2L, '4'=3L)}
 data_en[GHQ] <- lapply(data_en[GHQ], GHQrecode)
 GHQ <- GHQ[1:12]
-data_en$GHQsum <- rowSums(data_en[GHQ])
+data_en$P <- rowSums(data_en[GHQ])
 
-#SOZU (percieved soc support):
+#PSS (percieved social support):
 
 term <- "H2_"
-SOZU <- grep(term, names(data_en))
-SOZU <- SOZU[1:7]
-data_en$SOZUSum <- rowSums(data_en[SOZU])
+PSSindex <- grep(term, names(data_en))
+PSSindex <- SOZU[1:7]
+data_en$PSS <- rowSums(data_en[PSSindex])
 
 #COVID-19 support:
-#data_en$H2_08 <- as.numeric(data_en$H2_08)
+data_en$CSS <- as.numeric(data_en$H2_08)
 
 #Optimism:
-#data_en$H3_01 <- as.numeric(data_en$H3_01)
+data_en$OPT <- as.numeric(data_en$H3_01)
 
-#ASKU (self efficacy):
+#Perceived general self efficacy:
 term <-"H4_"
-ASKU <- grep(term, names(data_en))
-data_en$ASKUSum <- rowSums(data_en[ASKU])
+GSEindex <- grep(term, names(data_en))
+data_en$GSE <- rowSums(data_en[GSEindex])
 
 # self-percieved reslience (BRS):
 term <- "H5_"
 BRS <- grep(term, names(data_en))
 BRSrec <- c("H5_02", "H5_04", "H5_06")
 data_en[,BRSrec] <- 6 - data_en[,BRSrec]
-data_en$BRSMean <- rowMeans(data_en[BRS])
+data_en$REC <- rowMeans(data_en[BRS])
 
 #BFI Neuroticism:
 data_en$H6_01 <- 6 - data_en$H6_01
@@ -248,12 +248,12 @@ term <- "H6_"
 BFI <- grep(term, names(data_en))
 BFIrecode <- function(x){recode(x, '1'=-2L, '2'=-1L, '3'=0L, '4'=1L,'5'=2L)}
 data_en[BFI] <- lapply(data_en[BFI], BFIrecode)
-data_en$BFISum <- rowSums(data_en[BFI])
+data_en$NEU <- rowSums(data_en[BFI])
 
-#COPE
+#Behavioral Coping style
 term <- "COPE"
 COPE <- grep(term, names(data_en))
-data_en$COPESum <- rowSums(data_en[COPE])
+data_en$BCS <- rowSums(data_en[COPE])
 
 #CERQ
 term <- "CERQ"
@@ -261,37 +261,49 @@ CERQ <- grep(term, names(data_en))
 data_en$CERQSum <- rowSums(data_en[CERQ])
 
 #Positive Appraisal Style:
-
 PAS <- data_en[,c(CERQ, 106, 110 )]
 PAS[,c("H1_COPE_18","H1_COPE_28")] <- PAS[,c("H1_COPE_18","H1_COPE_28")]*5/4 #rescale
-data_en$PASMean <- rowMeans(PAS)
+data_en$PAS <- rowMeans(PAS)
 
 #CORONA specific appraisal:
 term <- "H1_Cor_"
-CorAS <- grep(term, names(data_en))
-data_en$CorAS <- rowSums(data_en[CorAS])
+PAC <- grep(term, names(data_en))
+data_en$PAC <- rowSums(data_en[CorAS])
+
+#### calculation of stressors
+# SCM = stressor count method
+# SSM = stressor severity method
 
 #CORONA Stressors:
 term <- "CE_"
 CE <- grep(term, names(data_en))
 CE <- CE[1:30]
-data_en$CEcount <- rowSums(data_en[CE] >0) #stressor count
-data_en$CEweighted <- rowSums(data_en[CE])/5 #weighted
+data_en$Es.SCM <- rowSums(data_en[CE] >0) #stressor count
+data_en$Es.SSM <- rowSums(data_en[CE])/5 #weighted
 
 #DHs:
 term <- "GE_"
 GE <- grep(term, names(data_en))
 GE <- GE[1:12]
-data_en$GEcount <- rowSums(data_en[GE] >0) #stressor count
-data_en$GEweighted <- rowSums(data_en[GE])/5 #weighted
+data_en$Eg.SCM <- rowSums(data_en[GE] >0) #stressor count
+data_en$Eg.SMM <- rowSums(data_en[GE])/5 #weighted
+
+#combined:
+Eall <- c(grep("GE_", names(data_en))[1:12], grep("CE_", names(data_en))[1:30])
+data_en$Ec.SCM <- rowSums(data_en[Eall] >0) #stressor count
+data_en$Ec.SMM <- rowSums(data_en[Eall])/5 #weighted
+
+# test
+which(data_en$Ec.SCM!=rowSums(data_en[ , c("Eg.SCM" ,"Es.SCM")]))
+#--> should be 0
 
 ##################### SR Score ###################
 
 #adapted from Haakon's script
-m1 <- summary(lm(scale(GHQsum)~scale(GEcount),data= data_en))
+m1 <- summary(lm(scale(P)~scale(GEcount),data= data_en))
 data_en$SR_GEcount <-as.numeric(scale(resid(m1)))
 
-m2 <- summary(lm(scale(GHQsum)~scale(CEcount),data= data_en))
+m2 <- summary(lm(scale(P)~scale(CEcount),data= data_en))
 data_en$SR_CEcount <-as.numeric(scale(resid(m2)))
 
 
