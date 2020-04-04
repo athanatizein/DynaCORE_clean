@@ -59,9 +59,9 @@ data_en = data_en[-xx,]
 #################### covariates: plausibility checks & basic formatting ########################
 data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)] <- lapply(data_en[,c(1:2, 10:12,14:16, 18:19, 53:54, 58:59, 60:61,64)], as.factor)
 
-data_en$income = factor(data_en$income, order = TRUE)
-data_en$illness.prone = factor(data_en$illness.prone, order = TRUE)
-data_en$tested.pos.symptoms = factor(data_en$tested.pos.symptoms, order = TRUE)
+data_en$household.income = factor(data_en$household.income, order = TRUE)
+data_en$health.status = factor(data_en$health.status, order = TRUE)
+data_en$symptom.severity = factor(data_en$symptom.severity, order = TRUE)
 
 data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
 data_en$C22_measures = as.numeric(data_en$C22_measures)
@@ -111,12 +111,12 @@ data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime)
 
 
 ###### date of Corona test #####
-data_en$tested.pos.date = gsub(".", "/", data_en$tested.pos.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
-data_en$tested.pos.date[which(nchar(data_en$tested.pos.date)<5)]=NA # set all that are not a date to NA
+data_en$COVID19.infection.test.date = gsub(".", "/", data_en$COVID19.infection.test.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
+data_en$COVID19.infection.test.date[which(nchar(data_en$COVID19.infection.test.date)<5)]=NA # set all that are not a date to NA
 #convert month-day-year to year-month-day date
-data_en$tested.pos.date = as.Date(data_en$tested.pos.date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
+data_en$COVID19.infection.test.date = as.Date(data_en$COVID19.infection.test.date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
 #date as POSIXlt
-data_en$tested.pos.date = as.POSIXlt(paste(data_en$tested.pos.date), tz = "Europe/Berlin", format="%Y-%m-%d")
+data_en$COVID19.infection.test.date = as.POSIXlt(paste(data_en$COVID19.infection.test.date), tz = "Europe/Berlin", format="%Y-%m-%d")
 
 
 ###### age #####
@@ -135,33 +135,33 @@ data_en$age[which(data_en$age > 100)] = NA
 ###### education #####
 
 # # test
-# data_en$education[2] = "22 years"
-# data_en$education[4] = "5 primary school 10 highschool"
+# data_en$years.of.education[2] = "22 years"
+# data_en$years.of.education[4] = "5 primary school 10 highschool"
 
-data_en$education.fulltext = data_en$education
-data_en$education = numextract(data_en$education) # extract the numeric component of free form education response
-data_en$education = as.numeric(data_en$education)
+data_en$years.of.education.fulltext = data_en$years.of.education
+data_en$years.of.education = numextract(data_en$years.of.education) # extract the numeric component of free form years.of.education response
+data_en$years.of.education = as.numeric(data_en$years.of.education)
 
 for(i in 1:length(data_en$Respondent.ID)){
-  if (!is.na(data_en$education[i])) {
-    if(data_en$education[i] > data_en$age[i]){
-      data_en$education[i] = NA
+  if (!is.na(data_en$years.of.education[i])) {
+    if(data_en$years.of.education[i] > data_en$age[i]){
+      data_en$years.of.education[i] = NA
     }
-    if(!is.na(data_en$education[i]) && data_en$education[i] > 10){
-      data_en$education.fulltext[i] = NA
+    if(!is.na(data_en$years.of.education[i]) && data_en$years.of.education[i] > 10){
+      data_en$years.of.education.fulltext[i] = NA
     }
   }
 }
 
 ###### current.location ####
-## combines the variables "residence.country", "away.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
+## combines the variables "country.of.residence", "away.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
 ##R can default character columns to factors, so first step is to make sure variables of interest are characters
-data_en[ , c("away.country" ,"residence.country") ] <- sapply( data_en[ , c("away.country" ,"residence.country") ] , as.character )
+data_en[ , c("away.country" ,"country.of.residence") ] <- sapply( data_en[ , c("away.country" ,"country.of.residence") ] , as.character )
 ##now we use a simple ifelse statement to create a new variable that gives us currenty location (country)
-data_en$current.location <- ifelse(data_en$away.currently == '1', data_en$away.country, data_en$residence.country)
+data_en$current.location <- ifelse(data_en$away.currently == '1', data_en$away.country, data_en$country.of.residence)
 
 # #test
-# data_en$residence.country[2] #gives Algeria
+# data_en$country.of.residence[2] #gives Algeria
 # data_en$away.country[2] #Gives Andorra
 # data_en$away.currently[2] #Gives Yes, so current loc should be Andorra
 # data_en$current.location[2] #gives Andorra, hooray            
@@ -313,7 +313,7 @@ data_en$SR_CEcount <-as.numeric(scale(resid(m2)))
 Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 77, 80, 81, 86, 88, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 154, 158, 162, 163, 168, 174, 175, 180, 191, 193)
 # for now, the above list does not include Russia (148), Kasakhstan (92) & Turkey (186), since they are trans-continental
 
-xx = which(data_en$residence.country %in% Europe)
+xx = which(data_en$country.of.residence %in% Europe)
 data_en$from.eu = 0
 data_en$from.eu[xx] = 1
 data_en$from.eu = as.factor(data_en$from.eu)
@@ -335,7 +335,7 @@ Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 
 # for now, the above list does not include Russia (148), Kasakhstan (92) & Turkey (186), since they are trans-continental
 
 ##### select subjects FROM Europe
-#xx = which(data_en$residence.country %in% Europe)
+#xx = which(data_en$country.of.residence %in% Europe)
 
 ##### select subjects IN Europe
 #xx = which(data_en$current.location %in% Europe)
@@ -396,6 +396,6 @@ data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
 
 ##### quality control #####
 
-# "education.fulltext" includes the full answer for education for anyone with less than 10 years.
-# check these answers to make sure this was not due to typos or nor summing the total years of education
+# "years.of.education.fulltext" includes the full answer for years.of.education for anyone with less than 10 years
+# check these answers to make sure this was not due to typos or nor summing the total years of 
 
