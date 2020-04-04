@@ -331,6 +331,19 @@ data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
 # index people who work as freelancers
 
 # list of mental health conditions
+                           
+#currently location (country)
+## combines the variables "country.residence", "away.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
+##R can default character columns to factors, so first step is to make sure variables of interest are characters
+data_en[ , c("away.country" ,"country.residence") ] <- sapply( data_en[ , c("away.country" ,"country.residence") ] , as.character )
+##now we use a simple ifelse statement to create a new variable that gives us currenty location (country)
+data_en$current.location <- ifelse(data_en$away.currently == 'Yes', data_en$away.country, data_en$country.residence)
+
+# #test
+# data_en$country.residence[2] #gives Algeria
+# data_en$away.country[2] #Gives Andorra
+# data_en$away.currently[2] #Gives Yes, so current loc should be Andorra
+# data_en$current.location[2] #gives Andorra, hooray                         
 
 
 ##### quality control #####
