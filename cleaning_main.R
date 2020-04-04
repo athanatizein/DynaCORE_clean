@@ -16,11 +16,11 @@
 
 rm(list = ls())
 require(foreign)
+require(plyr)
 require(dplyr)
 require(stringr)
 require(BBmisc)
 require(stringr)
-#require(plyr)
 # run the functions 'rename.R', 'formatting.R', ... or source:
 # source("/.../DynaCORE_clean/rename.R")
 # source("/.../DynaCORE_clean/formatting.R")
@@ -76,11 +76,27 @@ data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
 xx = numextract(data_en$X.28)
 data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
 
-# select cases where more/same people in household are underage than total household
+# set cases where more/same people in household are underage than total household to NA
 xx = which(data_en$cohabs.cont+0.5<=data_en$cohabitants.underage)
 data_en$cohabitants[xx] = NA
 data_en$cohabs.cont[xx] = NA
 data_en$cohabitants.underage[xx] = NA
+
+# set cases with mismatch in occulation to NA
+data_en$not.working.12 <- lapply(data_en$occupation, function(ch) grep("16", ch))
+data_en$not.working.12[sapply(data_en$not.working.12, function(x) length(x)==0)] <- NA
+
+employed = c("1", "2", "3", "4")
+data_en$employed.13 <- lapply(data_en$occupational.status, function(ch) grep(paste(employed, collapse="|"), ch))
+data_en$employed.13[sapply(data_en$employed.13, function(x) length(x)==0)] <- NA
+
+# find people that are unemployed in 12 but working in 13
+xx = which(!is.na(data_en$not.working.12) && !is.na(data_en$employed.13))
+data_en$occupation[xx] <- NA
+data_en$occupational.status[xx] <- NA
+
+# find people that are employed in 12 but not working in 13
+# STILL to do
 
 # I think mental health is wrongly coded as 0 = yes, 1 = no, so recode ONCE ONLY:
 data_en$diagnosed.mental.health = revalue(data_en$diagnosed.mental.health, c("0"="1", "1"="0"))
@@ -213,7 +229,7 @@ term <- "H6_"
 BFI <- grep(term, names(data_en))
 BFIrecode <- function(x){recode(x, '1'=-2L, '2'=-1L, '3'=0L, '4'=1L,'5'=2L)}
 data_en[BFI] <- lapply(data_en[BFI], BFIrecode)
-data_en$BFIsum <- rowSums(data_en[BFI])
+data_en$BFISum <- rowSums(data_en[BFI])
 
 #COPE
 term <- "COPE"
@@ -262,7 +278,8 @@ data_en$Respondent.ID[which(data_en$age < 18)]<- NA
 # data_en$Respondent.ID[which(data_en$completionTime < 400)]<- NA
 
 ##### exclude subjects not from Europe
-Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 80, 81, 86, 88, 92, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 148, 154, 158, 162, 163, 168, 174, 175, 180, 186, 191, 193)
+Europe = c(2, 4, 9, 11, 12, 17, 18, 23, 28, 45, 47, 48, 51, 60, 63, 64, 67, 68, 70, 77, 80, 81, 86, 88, 98, 103, 104, 105, 111, 117, 119, 127, 132, 142, 143, 146, 147, 154, 158, 162, 163, 168, 174, 175, 180, 191, 193)
+# for now, the above list does not include Russia (148), Kasakhstan (92) & Turkey (186), since they are trans-continental
 
 xx = which(data_en$country.residence %in% Europe)
 data_en = data_en[xx,]
@@ -305,6 +322,16 @@ xx = grep("X", colnames(data_en))
 data_en = data_en[-xx]
 
 data_en = data_en[, colSums(is.na(data_en)) != nrow(data_en)]
+
+
+######### processing covariates ############
+# index people who work in healthcare
+# index people who are unemployed
+
+# index people who work as freelancers
+
+# list of mental health conditions
+
 
 ##### quality control #####
 
