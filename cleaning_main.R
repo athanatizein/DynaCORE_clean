@@ -174,6 +174,7 @@ data_en$missing <- rowSums(is.na(data_en[,c(68:154,156:167)]))
 data_en <- data_en[data_en$missing == 0,]
 
 #GHQ: 
+data_en$CM_07 <- 5 - data_en$CM_07
 term <- "CM"
 GHQ <- grep(term, names(data_en))
 GHQrecode <- function(x){recode(x, '1'=0L, '2'=1L, '3'=2L, '4'=3L)}
