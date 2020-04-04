@@ -247,6 +247,11 @@ PAS <- data_en[,c(CERQ, 106, 110 )]
 PAS[,c("H1_COPE_18","H1_COPE_28")] <- PAS[,c("H1_COPE_18","H1_COPE_28")]*5/4 #rescale
 data_en$PASMean <- rowMeans(PAS)
 
+#CORONA specific appraisal:
+term <- "H1_Cor_"
+CorAS <- grep(term, names(data_en))
+data_en$CorAS <- rowSums(data_en[CorAS])
+
 #CORONA Stressors:
 term <- "CE_"
 CE <- grep(term, names(data_en))
