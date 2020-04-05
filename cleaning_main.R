@@ -13,17 +13,21 @@
 #
 
 
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(plyr,dplyr,foreign, stringr, BBmisc, stringr)
+
 
 rm(list = ls())
-require(foreign)
-require(plyr)
-require(dplyr)
-require(stringr)
-require(BBmisc)
-require(stringr)
+# require(foreign)
+# require(plyr)
+# require(dplyr)
+# require(stringr)
+# require(BBmisc)
+# require(stringr)
 # run the functions 'rename.R', 'formatting.R', ... or source:
-# source("/.../DynaCORE_clean/rename.R")
-# source("/.../DynaCORE_clean/formatting.R")
+source("rename.R")
+source("formatting.R")
 
 numextract <- function(string){ 
   str_extract(string, "\\-*\\d+\\.*\\d*")
@@ -220,7 +224,7 @@ data_en$P <- rowSums(data_en[GHQ])
 #PSS (percieved social support):
 term <- "H2_"
 PSSindex <- grep(term, names(data_en))
-PSSindex <- SOZU[1:7]
+#PSSindex <- SOZU[1:7]
 data_en$PSS <- rowSums(data_en[PSSindex])
 
 #COVID-19 support:
@@ -261,13 +265,16 @@ data_en$CERQSum <- rowSums(data_en[CERQ])
 
 #Positive Appraisal Style:
 PAS <- data_en[,c(CERQ, 106, 110 )]
+
+#HE: According to prereg we just do Z scores, but this aproach might be better. 
 PAS[,c("H1_COPE_18","H1_COPE_28")] <- PAS[,c("H1_COPE_18","H1_COPE_28")]*5/4 #rescale
+
 data_en$PAS <- rowMeans(PAS)
 
 #CORONA specific appraisal:
 term <- "H1_Cor_"
 PAC <- grep(term, names(data_en))
-data_en$PAC <- rowSums(data_en[CorAS])
+data_en$PAC <- rowSums(data_en[PAC])
 
 #### calculation of stressors
 # SCM = stressor count method
@@ -285,12 +292,12 @@ term <- "GE_"
 GE <- grep(term, names(data_en))
 GE <- GE[1:12]
 data_en$Eg.SCM <- rowSums(data_en[GE] >0) #stressor count
-data_en$Eg.SMM <- rowSums(data_en[GE])/5 #weighted
+data_en$Eg.SSM <- rowSums(data_en[GE])/5 #weighted
 
 #combined:
 Eall <- c(grep("GE_", names(data_en))[1:12], grep("CE_", names(data_en))[1:30])
 data_en$Ec.SCM <- rowSums(data_en[Eall] >0) #stressor count
-data_en$Ec.SMM <- rowSums(data_en[Eall])/5 #weighted
+data_en$Ec.SSM <- rowSums(data_en[Eall])/5 #weighted
 
 # test
 which(data_en$Ec.SCM!=rowSums(data_en[ , c("Eg.SCM" ,"Es.SCM")]))
