@@ -63,16 +63,16 @@ data_en$household.income = factor(data_en$household.income, order = TRUE)
 data_en$health.status = factor(data_en$health.status, order = TRUE)
 data_en$symptom.severity = factor(data_en$symptom.severity, order = TRUE)
 
-data_en$cohabitants.underage = as.numeric(data_en$cohabitants.underage)
-data_en$C22_measures = as.numeric(data_en$C22_measures)
-data_en$C23_compliance = as.numeric(data_en$C23_compliance)
+data_en$people.in.household.under.18 = as.numeric(data_en$people.in.household.under.18)
+data_en$opinion.about.authorities.measures = as.numeric(data_en$opinion.about.authorities.measures)
+data_en$adherence.to.recommended.procedures = as.numeric(data_en$adherence.to.recommended.procedures)
 
-##### cohabitants as continuous ####
-data_en$cohabs.cont = as.numeric(data_en$cohabitants)
-data_en$cohabs.cont[which(data_en$cohabs.cont == 3)] = 3.5
-data_en$cohabs.cont[which(data_en$cohabs.cont == 4)] = 5.5
+##### people.in.household as continuous ####
+data_en$people.in.household.cont = as.numeric(data_en$people.in.household)
+data_en$people.in.household.cont[which(data_en$people.in.household.cont == 3)] = 3.5
+data_en$people.in.household.cont[which(data_en$people.in.household.cont == 4)] = 5.5
 xx = numextract(data_en$X.28)
-data_en$cohabs.cont[which(data_en$cohabs.cont == 5)] = as.numeric(xx)
+data_en$people.in.household.cont[which(data_en$people.in.household.cont == 5)] = as.numeric(xx)
 
 ###### date and completion time ########
 
@@ -111,12 +111,12 @@ data_en$completionTime = difftime(data_en$End.DateTime, data_en$Start.DateTime)
 
 
 ###### date of Corona test #####
-data_en$COVID19.infection.test.date = gsub(".", "/", data_en$COVID19.infection.test.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
-data_en$COVID19.infection.test.date[which(nchar(data_en$COVID19.infection.test.date)<5)]=NA # set all that are not a date to NA
+data_en$infection.test.status.date = gsub(".", "/", data_en$infection.test.status.date, fixed=TRUE)#mm.dd.yyyy becomes mm/dd/yyyy
+data_en$infection.test.status.date[which(nchar(data_en$infection.test.status.date)<5)]=NA # set all that are not a date to NA
 #convert month-day-year to year-month-day date
-data_en$COVID19.infection.test.date = as.Date(data_en$COVID19.infection.test.date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
+data_en$infection.test.status.date = as.Date(data_en$infection.test.status.date, tryFormats = c("%m-%d-%Y", "%m/%d/%Y"), optional = FALSE)
 #date as POSIXlt
-data_en$COVID19.infection.test.date = as.POSIXlt(paste(data_en$COVID19.infection.test.date), tz = "Europe/Berlin", format="%Y-%m-%d")
+data_en$infection.test.status.date = as.POSIXlt(paste(data_en$infection.test.status.date), tz = "Europe/Berlin", format="%Y-%m-%d")
 
 
 ###### age #####
@@ -154,28 +154,28 @@ for(i in 1:length(data_en$Respondent.ID)){
 }
 
 ###### current.location ####
-## combines the variables "country.of.residence", "away.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
+## combines the variables "country.of.residence", "current.stay.out.of.town.country" and "currently.away" into a variable "current.location" -> if subjects are away, their their location is the away country location, if they are not, the country of residence location is
 ##R can default character columns to factors, so first step is to make sure variables of interest are characters
-data_en[ , c("away.country" ,"country.of.residence") ] <- sapply( data_en[ , c("away.country" ,"country.of.residence") ] , as.character )
+data_en[ , c("current.stay.out.of.town.country" ,"country.of.residence") ] <- sapply( data_en[ , c("current.stay.out.of.town.country" ,"country.of.residence") ] , as.character )
 ##now we use a simple ifelse statement to create a new variable that gives us currenty location (country)
-data_en$current.location <- ifelse(data_en$away.currently == '1', data_en$away.country, data_en$country.of.residence)
+data_en$current.location <- ifelse(data_en$current.stay.out.of.town == '1', data_en$current.stay.out.of.town.country, data_en$country.of.residence)
 
 # #test
 # data_en$country.of.residence[2] #gives Algeria
-# data_en$away.country[2] #Gives Andorra
-# data_en$away.currently[2] #Gives Yes, so current loc should be Andorra
+# data_en$current.stay.out.of.town.country[2] #Gives Andorra
+# data_en$current.stay.out.of.town[2] #Gives Yes, so current loc should be Andorra
 # data_en$current.location[2] #gives Andorra, hooray            
 
 #### clean-up inconsistent responses ####
 # set responses for place of location to NA if away currently was answered with 0
-data_en$away.country[which(data_en$away.currently==2)] <- NA
-data_en$away.city[which(data_en$away.currently==2)] <- NA
+data_en$current.stay.out.of.town.country[which(data_en$current.stay.out.of.town==2)] <- NA
+data_en$current.stay.out.of.town.city[which(data_en$current.stay.out.of.town==2)] <- NA
 
 # set cases where more/same people in household are underage than total household to NA
-xx = which(data_en$cohabs.cont+0.5<=data_en$cohabitants.underage)
-data_en$cohabitants[xx] = NA
-data_en$cohabs.cont[xx] = NA
-data_en$cohabitants.underage[xx] = NA
+xx = which(data_en$people.in.household.cont+0.5<=data_en$people.in.household.under.18)
+data_en$people.in.household[xx] = NA
+data_en$people.in.household.cont[xx] = NA
+data_en$people.in.household.under.18[xx] = NA
 
 # set cases with mismatch in occulation to NA
 data_en$not.working.12 <- lapply(data_en$occupation, function(ch) grep("16", ch))
@@ -218,7 +218,6 @@ GHQ <- GHQ[1:12]
 data_en$P <- rowSums(data_en[GHQ])
 
 #PSS (percieved social support):
-
 term <- "H2_"
 PSSindex <- grep(term, names(data_en))
 PSSindex <- SOZU[1:7]
@@ -300,13 +299,24 @@ which(data_en$Ec.SCM!=rowSums(data_en[ , c("Eg.SCM" ,"Es.SCM")]))
 ##################### SR Score ###################
 
 #adapted from Haakon's script
-m1 <- summary(lm(scale(P)~scale(GEcount),data= data_en))
-data_en$SR_GEcount <-as.numeric(scale(resid(m1)))
+m1 <- summary(lm(scale(P)~scale(Eg.SCM),data= data_en))
+data_en$SR_Eg.SCM <-as.numeric(scale(resid(m1)))
 
-m2 <- summary(lm(scale(P)~scale(CEcount),data= data_en))
-data_en$SR_CEcount <-as.numeric(scale(resid(m2)))
+m2 <- summary(lm(scale(P)~scale(Es.SCM),data= data_en))
+data_en$SR_Es.SCM <-as.numeric(scale(resid(m2)))
 
+m3 <- summary(lm(scale(P)~scale(Ec.SCM),data= data_en))
+data_en$SR_c.SCM <-as.numeric(scale(resid(m3)))
 
+## do the same with severity ratings?
+m4 <- summary(lm(scale(P)~scale(Eg.SSM),data= data_en))
+data_en$SR_Eg.SSM <-as.numeric(scale(resid(m4)))
+
+m5 <- summary(lm(scale(P)~scale(Es.SSM),data= data_en))
+data_en$SR_Es.SSM <-as.numeric(scale(resid(m5)))
+
+m6 <- summary(lm(scale(P)~scale(Ec.SSM),data= data_en))
+data_en$SR_c.SSM <-as.numeric(scale(resid(m6)))
 ######################## subgroup selection ######################## 
 
 ##### select subjects FROM Europe
